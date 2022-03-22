@@ -47,12 +47,12 @@
 	get_controlling_player()
 
 //Called when this atom starts charging at another, just before taking the first step
-/mob/living/simple_animal/necromorph/divider_component/charge_started(var/datum/extension/charge/charge)
-	update_icon()
-
-//Called when this atom starts finishes a charge, called after everything, just before the cooldown timer starts
-/mob/living/simple_animal/necromorph/divider_component/charge_ended(var/datum/extension/charge/charge)
-	update_icon()
+///mob/living/simple_animal/necromorph/divider_component/charge_started(var/datum/extension/charge/charge)
+//	update_icon()
+//
+////Called when this atom starts finishes a charge, called after everything, just before the cooldown timer starts
+///mob/living/simple_animal/necromorph/divider_component/charge_ended(var/datum/extension/charge/charge)
+//	update_icon()
 
 
 /mob/living/simple_animal/necromorph/divider_component/proc/get_controlling_player()
@@ -70,8 +70,8 @@
 	//if (!isliving(A))
 		//A = autotarget_enemy_mob(A, 2, src, 999)
 
-	if(!can_charge(A))
-		return
+//	if(!can_charge(A))
+//		return
 
 	//Starting a leap plays an attack sound which ignores cooldown
 	if(LAZYLEN(attack_sounds))
@@ -90,7 +90,7 @@
 
 
 
-	return leap_attack(A, _cooldown = leap_cooldown, _delay = (leap_windup_time - (0.2 SECONDS)), _speed = 7, _maxrange = 6, _lifespan = 5 SECONDS, subtype = /datum/extension/charge/leap/component)
+//	return leap_attack(A, _cooldown = leap_cooldown, _delay = (leap_windup_time - (0.2 SECONDS)), _speed = 7, _maxrange = 6, _lifespan = 5 SECONDS, subtype = /datum/extension/charge/leap/component)
 
 
 

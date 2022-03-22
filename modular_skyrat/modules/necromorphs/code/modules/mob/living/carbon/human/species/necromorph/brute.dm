@@ -195,7 +195,7 @@ Brute will be forced into a reflexive curl under certain circumstances, but it c
 	set category = "Abilities"
 
 
-	.= brute_charge_attack(A, _delay = 1.25 SECONDS, _speed = 4, _lifespan = 8 SECONDS, _inertia = TRUE)
+//	.= brute_charge_attack(A, _delay = 1.25 SECONDS, _speed = 4, _lifespan = 8 SECONDS, _inertia = TRUE)
 	if (.)
 		var/mob/living/carbon/human/H = src
 		if (istype(H))

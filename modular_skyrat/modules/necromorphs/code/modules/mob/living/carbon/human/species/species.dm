@@ -137,17 +137,17 @@
 
 
 
-/datum/species/proc/setup_defense(var/mob/living/carbon/human/H)
+/datum/species/proc/setup_defense(mob/living/carbon/human/H)
 
 //Species level audio wrappers
 //--------------------------------
-/datum/species/proc/get_species_audio(var/audio_type)
+/datum/species/proc/get_species_audio(audio_type)
 	var/list/L = species_audio[audio_type]
 	if (L)
 		return pickweight(L)
 	return null
 
-/datum/species/proc/play_species_audio(var/atom/source, audio_type, vol as num, vary, extrarange as num, falloff, var/is_global, var/frequency, var/is_ambiance = 0)
+/datum/species/proc/play_species_audio(atom/source, audio_type, vol as num, vary, extrarange as num, falloff, is_global, frequency, is_ambiance = 0)
 	var/soundin = get_species_audio(audio_type)
 	if (soundin)
 		playsound(source, soundin, vol, vary, extrarange, falloff, is_global, frequency, is_ambiance)
@@ -158,17 +158,16 @@
 /mob/proc/play_species_audio()
 	return
 
-/mob/living/carbon/human/play_species_audio(var/atom/source, audio_type, var/volume = VOLUME_MID, var/vary = TRUE, extrarange as num, falloff, var/is_global, var/frequency, var/is_ambiance = 0)
-
-	if (species.species_audio_volume[audio_type])
-		volume = species.species_audio_volume[audio_type]
-	return species.play_species_audio(arglist(args.Copy()))
+/mob/living/carbon/human/play_species_audio(atom/source, audio_type, volume = VOLUME_MID, vary = TRUE, extrarange as num, falloff, is_global, frequency, is_ambiance = 0)
+	if(dna.species.species_audio_volume[audio_type])
+		volume = dna.species.species_audio_volume[audio_type]
+	return dna.species.play_species_audio(arglist(args.Copy()))
 
 /mob/proc/get_species_audio()
 	return
 
-/mob/living/carbon/human/get_species_audio(var/audio_type)
-	return species.get_species_audio(arglist(args.Copy()))
+/mob/living/carbon/human/get_species_audio(audio_type)
+	return dna.species.get_species_audio(arglist(args.Copy()))
 
 //Descriptions and documentation
 //----------------------------------------

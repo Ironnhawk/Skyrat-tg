@@ -11,22 +11,6 @@
 /mob/living/carbon/human/species/necromorph
 	race = /datum/species/necromorph
 	name = "Necromorph"
-/mob/living/carbon/human/species/necromorph/New(var/new_loc, var/new_species = SPECIES_NECROMORPH)
-	..(new_loc, new_species)
-
-
-/mob/living/carbon/human/species/necromorph/Initialize()
-	add_verb(src, /mob/living/proc/mob_sleep)
-	add_verb(src, /mob/living/proc/toggle_resting)
-
-	create_bodyparts() //initialize bodyparts
-
-	create_internal_organs()
-	ADD_TRAIT(src, TRAIT_CAN_STRIP, INNATE_TRAIT)
-	ADD_TRAIT(src, TRAIT_NEVER_WOUNDED, INNATE_TRAIT)
-	ADD_TRAIT(src, TRAIT_VENTCRAWLER_ALWAYS, INNATE_TRAIT)
-
-	. = ..()
 
 /mob/living/carbon/human/species/necromorph/regenerate_icons()
 	if(!..())
@@ -39,6 +23,8 @@
 */
 /mob/living/carbon/human/species/necromorph/slasher
 	race = /datum/species/necromorph/slasher
+/mob/living/carbon/human/species/necromorph/slasher/enhanced
+	race = /datum/species/necromorph/slasher/enhanced
 /mob/living/carbon/human/species/necromorph/divider
 	race = /datum/species/necromorph/divider
 /mob/living/carbon/human/species/necromorph/exploder
@@ -86,53 +72,6 @@
 	icon = 'modular_skyrat/modules/necromorphs/icons/mob/necromorph/brute.dmi'
 	icon_state = "brute-d"
 
-/mob/living/carbon/human/species/necromorph/slasher/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_SLASHER)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/slasher_enhanced/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_SLASHER_ENHANCED)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/divider/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_DIVIDER)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/spitter/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_SPITTER)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/puker/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_PUKER)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/tripod/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_TRIPOD)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/twitcher/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_TWITCHER)
-	..(new_loc, new_species)
-
-//Variants need their own mobtype
-/mob/living/carbon/human/species/necromorph/brute/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_BRUTE)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/bruteflesh/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_BRUTE_FLESH)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/exploder/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_EXPLODER)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/leaper/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_LEAPER)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/leaper/enhanced/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_LEAPER_ENHANCED)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/lurker/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_LURKER)
-	..(new_loc, new_species)
-
-/mob/living/carbon/human/species/necromorph/ubermorph/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_UBERMORPH)
-	..(new_loc, new_species)
-
-
-/* /mob/living/carbon/human/species/necromorph/hunter/New(var/new_loc, var/new_species = SPECIES_NECROMORPH_HUNTER)
-	..(new_loc, new_species) */
-
 /mob/living/carbon/human/necromorph/update_icons()
 	var/datum/species/necromorph/N = species
 	message_admins("[N] single_icon is set to [N.single_icon]")
@@ -176,6 +115,12 @@ and then you just set the icon and icon_state
 
 //Generic proc to see if a thing is aligned with the necromorph faction
 /datum/proc/is_necromorph()
+	return FALSE
+
+/mob/living/carbon/is_necromorph()
+	if(dna?.species)
+		if(istype(dna.species, /datum/species/necromorph))
+			return TRUE
 	return FALSE
 
 /* //We'll check the species on the brain first, before the rest of the body

@@ -21,7 +21,7 @@
 
 //Do not spawn
 /mob/living/simple_animal/hostile/necromorph
-	icon = 'modular_skyrat/modules/necromorphs/icons/mob/necromorph/slasher.dmi'
+	icon = 'modular_skyrat/modules/necromorphs/icons/mob/necromorph/slasher/fleshy.dmi'
 	//icon_state = "slasher_d"
 	pass_flags = PASSMARKER
 	faction = list(ROLE_NECROMORPH)

@@ -30,7 +30,7 @@
 //	icon_dead = "horror_dead"
 	pixel_offset_x = -8
 	limbs_id = "slasher"
-	limbs_icon = 'modular_skyrat/modules/necromorphs/icons/mob/necromorph/slasher.dmi'
+	limbs_icon = 'modular_skyrat/modules/necromorphs/icons/mob/necromorph/slasher/fleshy.dmi'
 	//body_position_pixel_x_offset = 0
 	//body_position_pixel_y_offset = 0
 
@@ -61,36 +61,6 @@
 	Slasher variant. Traits
 */
 
-	inherent_traits = list(
-		TRAIT_ADVANCEDTOOLUSER,
-		TRAIT_CAN_STRIP,
-		TRAIT_NOMETABOLISM,
-		TRAIT_TOXIMMUNE,
-		TRAIT_RESISTHEAT,
-		TRAIT_NOBREATH,
-		TRAIT_RESISTCOLD,
-		TRAIT_RESISTHIGHPRESSURE,
-		TRAIT_RESISTLOWPRESSURE,
-		TRAIT_RADIMMUNE,
-		TRAIT_GENELESS,
-		TRAIT_PIERCEIMMUNE,
-		TRAIT_NOHUNGER,
-		TRAIT_EASYDISMEMBER,
-		TRAIT_LIMBATTACHMENT,
-		TRAIT_XENO_IMMUNE,
-		TRAIT_NOCLONELOSS,
-	)
-
-	species_traits = list(
-		MUTCOLORS,
-		EYECOLOR,
-		LIPS,
-		HAS_FLESH,
-		HAS_BONE,
-		HAIR,
-		NO_UNDERWEAR,
-		FACEHAIR
-	)
 	inherent_biotypes = MOB_ORGANIC|MOB_HUMANOID
 
 /*
@@ -165,8 +135,22 @@
 	SPECIES_NECROMORPH_SLASHER_DESICCATED = list(WEIGHT = 2),
 	SPECIES_NECROMORPH_SLASHER_CARRION = list(WEIGHT = 0.1))
 
+	abilities = list(
+		/datum/action/cooldown/mob_cooldown/charge/necro = list(cooldown = 20 SECONDS, delay = 1 SECONDS, past = 1, distance = 20, speed = 2, damage = 15, destroy = FALSE, shake = 30),
+		/datum/action/cooldown/necro/shout = list(),
+		/datum/action/cooldown/necro/shout/long = list(),
+		/datum/action/cooldown/necro/dodge = list(),
+		/datum/action/cooldown/necro/active/gallop = list(),
+		/datum/action/cooldown/necro/high_leap = list(),
+		/datum/action/cooldown/necro/active/taunt = list(),
+		/datum/element/twitch = list(),
+		/datum/action/cooldown/mob_cooldown/fire_breath = list()
+	)
+
 	/*
-	outfits = list(/decl/hierarchy/outfit/naked = list(),
+	Use /datum/outfit here
+
+	outfits = list(/datum/outfit = list(),
 	/decl/hierarchy/outfit/necromorph/planet_cracker = list(),
 	/decl/hierarchy/outfit/necromorph/security = list(),
 	/decl/hierarchy/outfit/necromorph/biosuit = list(),
@@ -181,6 +165,8 @@
 	name = SPECIES_NECROMORPH_SLASHER_DESICCATED
 	//icon_template = 'icons/mob/necromorph/slasher/desiccated.dmi'
 	NECROMORPH_VISUAL_VARIANT
+	limbs_id = "desiccated_slasher"
+	limbs_icon = 'modular_skyrat/modules/necromorphs/icons/mob/necromorph/slasher/desiccated.dmi'
 
 /*
 /datum/species/necromorph/slasher/carrion
@@ -196,7 +182,8 @@
 */
 /datum/species/necromorph/slasher/enhanced
 	name = SPECIES_NECROMORPH_SLASHER_ENHANCED
-
+	limbs_id = "eslasher"
+	limbs_icon = 'modular_skyrat/modules/necromorphs/icons/mob/necromorph/slasher/enhanced.dmi'
 
 	species_audio = list(
 	SOUND_ATTACK = list('modular_skyrat/modules/necromorphs/sound/effects/creatures/necromorph/slasher_enhanced/eslasher_attack_1.ogg',
@@ -451,8 +438,8 @@ Fend automatically cancels when you perform a charge or a melee attack. Dodge wi
 /*---------------------
 	Wallcrawling
 -----------------------*/
-/datum/species/necromorph/slasher/setup_movement(var/mob/living/carbon/human/H)
-	H.AddComponent(/datum/component/wallrun/slasher)
+///datum/species/necromorph/slasher/setup_movement(var/mob/living/carbon/human/H)
+//	H.AddComponent(/datum/component/wallrun/slasher)
 
 /datum/component/wallrun/slasher/mount_to_atom(var/atom/target)
 	.=..()

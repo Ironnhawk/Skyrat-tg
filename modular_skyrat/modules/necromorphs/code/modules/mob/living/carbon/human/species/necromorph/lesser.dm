@@ -94,6 +94,7 @@
 	remove_massive_atom(src)
 	.=..()
 
+/*
 //Parasite Extension: The mob latches onto another mob and periodically bites it for some constant damage
 /datum/component/mount/parasite
 	var/damage = 5
@@ -189,3 +190,4 @@
 		return TRUE
 
 	return FALSE
+*/

@@ -1,300 +1,176 @@
-/*
-	High leap, a long distance attack ability.
-	The user jumps into the air, briefly going offscreen and untargetable, before landing at the target point
-
-	A jump happens in four stages:
-		Windup: We compress and push off from the ground. Sleep and then immediately call launch
-		Launch: We leave the ground and start travelling to the destination. Calculate when we should land and schedule for then
-		Landing: We drop in from above and land on the ground. Sleep and then immediately call wind down
-		Wind down: We recover from landing
-*/
-/datum/extension/high_leap
+/datum/action/cooldown/necro/high_leap
 	name = "High Leap"
-	base_type = /datum/extension/high_leap
-	expected_type = /atom/movable
-	flags = EXTENSION_FLAG_IMMEDIATE
-
-	var/status
-	var/mob/living/user
-	var/power = 1
-	var/cooldown = 1 SECOND
-
-	var/started_at
-	var/stopped_at
-
-	var/ongoing_timer
-
-	var/turf/start_location
-
+	click_to_activate = TRUE
+	cooldown_time = 1 SECONDS
+	var/datum/move_loop/loop
+	var/turf/started_at
+	var/block_movement = FALSE
+	var/tiles_moved = 0
 	//Must travel at least this far
-	var/minimum_range = 3
-
+	var/min_range = 3
 	//Metres per second, while in the air. Note that this speed is not guaranteed, short-ranged jumps may go slower than this to make the animation look right
-	var/travel_speed = 8
-
+	var/travel_speed = 1.25
 	//Time between giving command and actually taking off
-	var/windup_time = 1 SECOND
-
+	var/windup_time = 1 SECONDS
 	//Recovery time after landing
-	var/winddown_time = 1 SECOND
-
+	var/winddown_time = 1 SECONDS
 	//How long does the launching animation take? We'll start travel during this animation, so this is a minimum rather than an addition
 	var/launch_time = 4
 	//Like above, at the landing end
 	var/land_time = 4
-
-	var/turf/target_loc
-
-	//If not null, this is the thing we collided with while jumping
-	var/obstacle = null
-
-	var/distance = 0
-
 	//Temporary vars stored while travelling
-	var/cached_density = TRUE
+	var/cached_density
+	var/cached_alpha
+	var/cached_passflags
 
-	statmods = list(STATMOD_EVASION, 200)
-	auto_register_statmods = FALSE
-
-/datum/extension/high_leap/New(var/atom/movable/user, var/target, var/windup_time, var/winddown_time, var/cooldown, var/minimum_range = 3, var/travel_speed = 6)
+/datum/action/cooldown/necro/high_leap/New(Target, cooldown, windup_time, winddown_time, min_range, travel_speed)
+	if(windup_time)
+		src.windup_time = windup_time
+	if(winddown_time)
+		src.winddown_time = winddown_time
+	if(min_range)
+		src.min_range = min_range
+	if(travel_speed)
+		src.travel_speed = travel_speed
 	.=..()
-	if (isliving(user))
-		src.user = user
-		windup_time /= user.get_attack_speed_factor() //Factor in attackspeed
-		winddown_time /= user.get_attack_speed_factor()
-		cooldown /= user.get_attack_speed_factor() //Factor in attackspeed
-	target_loc = get_turf(target)
-	src.cooldown = cooldown
-	src.windup_time = windup_time
-	src.winddown_time = winddown_time
-	src.minimum_range = minimum_range
-	src.travel_speed = travel_speed
-	ongoing_timer = addtimer(CALLBACK(src, /datum/extension/high_leap/proc/windup), 0, TIMER_STOPPABLE)
 
+/datum/action/cooldown/necro/high_leap/Destroy()
+	if(!QDELETED(loop))
+		QDEL_NULL(loop)
+	.=..()
 
+/datum/action/cooldown/necro/high_leap/Activate(atom/target)
+	var/distance = get_dist(owner, target)
+	if(distance < min_range)
+		return
+	target = get_turf(target)
+	owner.setDir(get_dir(owner, target))
 
-/*----------------------------------
-	Windup
------------------------------------*/
-/datum/extension/high_leap/proc/windup()
-
-
-
-	var/atom/A = holder
-	started_at	=	world.time
-
-	//First of all lets find our landing point. We have our desired target loc, but it may not be valid
-
-	//We have a minimum range. If its not far enough, we extend out
-	distance = get_dist(holder, target_loc)
-	if (distance < minimum_range)
-		var/vector2/direction = Vector2.DirectionBetween(A, target_loc)
-		direction *= minimum_range
-		distance = minimum_range
-
-		target_loc = locate(A.x + direction.x, A.y + direction.y, A.z)
-	user.face_atom(target_loc)
-
-	if (user)
-		user.disable(windup_time)
-
-
-	//Alright now secondly, lets look for obstacles that might block us
-	var/list/results = check_trajectory_verbose(target_loc, holder, pass_flags=PASS_FLAG_TABLE|PASS_FLAG_FLYING|PASS_FLAG_NOMOB)
-	if (results[3] != target_loc)
-		//Uh oh, there's an obstacle here
-		obstacle = results[3]	//We will crash into this later
-
-
-	target_loc = results[2]	//We'll set our target to wherever the projectile reached
+	var/travel_time = distance * travel_speed
+	StartCooldown(winddown_time+winddown_time+travel_time+launch_time+land_time+1)
+	block_movement = TRUE
+	RegisterSignal(owner, COMSIG_MOVABLE_PRE_MOVE, .proc/owner_move)
 
 	windup_animation()
-	sleep(windup_time)
 
-	//Launch immediately after animation
-	launch()
+	cached_density = owner.density
+	cached_passflags = owner.pass_flags
+	owner.density = FALSE
+	//The only things we should really care about are walls and windows
+	owner.pass_flags |= (PASSTABLE|PASSBLOB|PASSMOB|PASSMACHINE|PASSSTRUCTURE|PASSVEHICLE|PASSITEM)
 
-/datum/extension/high_leap/proc/windup_animation()
-	var/atom/A = holder
-	var/matrix/M = A.get_default_transform()
+	launch_animation()
+	sleep(launch_time)
+
+	started_at = get_turf(owner)
+	tiles_moved = 0
+	loop = SSmove_manager.home_onto(owner, target, delay = travel_speed, timeout = travel_time, priority = MOVEMENT_ABOVE_SPACE_PRIORITY)
+	RegisterSignal(loop, COMSIG_MOVELOOP_PREPROCESS_CHECK, .proc/pre_move)
+	RegisterSignal(loop, COMSIG_MOVELOOP_POSTPROCESS, .proc/post_move)
+	RegisterSignal(loop, COMSIG_PARENT_QDELETING, .proc/land)
+	RegisterSignal(owner, COMSIG_MOVABLE_BUMP, .proc/on_bump)
+
+/datum/action/cooldown/necro/high_leap/proc/owner_move()
+	SIGNAL_HANDLER
+	if(block_movement)
+		return COMPONENT_MOVABLE_BLOCK_PRE_MOVE
+
+/datum/action/cooldown/necro/high_leap/proc/pre_move()
+	SIGNAL_HANDLER
+	block_movement = FALSE
+
+/datum/action/cooldown/necro/high_leap/proc/post_move()
+	SIGNAL_HANDLER
+	block_movement = TRUE
+	tiles_moved += 1
+
+/datum/action/cooldown/necro/high_leap/proc/on_bump(datum/source, atom/obstacle)
+	SIGNAL_HANDLER
+	obstacle.shake_animation(8)
+	var/mob/living/holder = owner
+	var/selfdamage = 15 + 2*tiles_moved
+	selfdamage = min(holder.maxHealth*0.15, selfdamage)
+	holder.take_overall_damage(selfdamage)
+	//We just smashed into a wall, window or something like that, perhaps stun should be even longer
+	holder.Stun(5 SECONDS)
+	qdel(loop)
+
+/datum/action/cooldown/necro/high_leap/proc/windup_animation()
+	var/matrix/M = matrix()
 	M = M.Scale(1, 0.8)	//Squish vertically
+	animate(owner, transform = M, time = windup_time * 0.667, pixel_y = owner.pixel_y-16, easing = QUAD_EASING)
+	sleep(windup_time*0.667)
+	M = matrix()
+	animate(owner, transform = M, pixel_y = owner.pixel_y+16, time = windup_time * 0.333)
+	sleep(windup_time*0.333)
 
-	animate(A, transform = M, time = windup_time * 0.665, pixel_y = A.default_pixel_y - 16, easing = QUAD_EASING, flags = ANIMATION_PARALLEL | ANIMATION_RELATIVE)
-
-	M = A.get_default_transform()
-	animate(transform = M, pixel_y = A.default_pixel_y, time = windup_time * 0.33)
-
-	//Animation
-
-
-/*----------------------------------
-	Launch
------------------------------------*/
-//Now we actually take off from the ground
-/datum/extension/high_leap/proc/launch()
-	var/atom/A = holder
-	//Cache some values before we launch
-	cached_density = A.density
-	A.density = FALSE
-	register_statmod(STATMOD_EVASION)
-
-	start_location = get_turf(A)
-
-
-
-	//Alright lets calculate when we're going to land. More specifically, we'll calculate when exactly we want landing to -finish- happening
-	var/travel_time = (distance / travel_speed) SECONDS	//This is how long it takes us to move from A to B
-	if (travel_time < (launch_time + land_time))
-		//We have minimum durations for takeoff and land animations, so those place a floor on how long this can take
-		//And if we modified the travel time, we must modify the speed to accomodate it too
-		travel_time = max(travel_time, launch_time + land_time)
-		travel_speed = distance / (travel_time*0.1)
-
-
-	//Okay now we know when landing will finish, and how long it will take. Lets set the timer to when we should start landing
-	addtimer(CALLBACK(src, /datum/extension/high_leap/proc/land), (travel_time - land_time))
-
-	//Also make sure the user isnt moving or clicking stuff while this happens
-	user.disable(travel_time)
-
-	//And finally, the most important step of all.
-	//ACTUALLY MOVE US TOWARDS THE DESTINATION
-	//Animate movement has no collision checks, but thats fine because we already did them before starting
-	animate_movement(holder, target_loc, travel_speed)
-
-	spawn(1)
-		//We do the launch animation after
-		launch_animation()
-
-
-
-
-//The sprite shifts upwards, grows and fades out as we leap up and out of view
-/datum/extension/high_leap/proc/launch_animation()
-
-	var/atom/A = holder
-	var/matrix/M = A.get_default_transform()
+/datum/action/cooldown/necro/high_leap/proc/launch_animation()
+	var/matrix/M = matrix()
 	M = M.Scale(1.5)
-	animate(A, transform = M,  pixel_y = 128, alpha = -A.default_alpha, time = launch_time, flags = ANIMATION_PARALLEL | ANIMATION_RELATIVE)
+	cached_alpha = owner.alpha
+	animate(owner, transform = M,  pixel_y = owner.pixel_y+128, alpha = 0, time = launch_time)
 
-
-/*----------------------------------
-	Land
------------------------------------*/
-//At this point we are almost hovering over our destination, we come in hard
-/datum/extension/high_leap/proc/land()
+/datum/action/cooldown/necro/high_leap/proc/land()
+	loop = null
 	land_animation()
-	unregister_statmods()
 	sleep(land_time)
 
-	//TODO: Impact here
-	var/atom/movable/A = holder
-	A.high_leap_impact(target_loc, distance, start_location)
+	owner.density = cached_density
+	owner.pass_flags = cached_passflags
 
-	//If an obstacle blocked the leap from going its full distance, we crash into that on landing
-	if (obstacle)
-		A.charge_impact(obstacle, 1, CHARGE_TARGET_SECONDARY, distance)
-
-
-	//Do the final stage
 	winddown()
+	//We play a sound!
+	var/sound_file = pick(list(
+	'modular_skyrat/modules/necromorphs/sound/effects/impacts/hard_impact_1.ogg',
+	'modular_skyrat/modules/necromorphs/sound/effects/impacts/hard_impact_2.ogg',
+	'modular_skyrat/modules/necromorphs/sound/effects/impacts/low_impact_1.ogg',
+	'modular_skyrat/modules/necromorphs/sound/effects/impacts/low_impact_2.ogg'))
+	playsound(owner, sound_file, VOLUME_MID, TRUE)
 
+	//The leap impact deals two burst of damage.
 
+	//Firstly, to mobs within 1 tile of us
+	new /obj/effect/temp_visual/expanding_circle(owner.loc, 0.5 SECONDS, -0.65)
+	for(var/mob/living/L in range(1, owner)-owner)
+		shake_camera(L,8,2)
 
-/datum/extension/high_leap/proc/land_animation()
-	var/atom/A = holder
-	var/matrix/M = A.get_default_transform()
-	animate(A, transform = M,  pixel_y = A.default_pixel_y, alpha = A.default_alpha, time = land_time)
+		L.take_overall_damage(10)
 
+	//TODO: Try to get rid of this vector
+	var/vector2/direction = Vector2.DirectionBetween(started_at, get_turf(owner))
 
-/*----------------------------------
-	Wind Down
------------------------------------*/
-/datum/extension/high_leap/proc/winddown()
-	//Last disable, you'll be free to move soon
-	if (user)
-		user.disable(winddown_time)
+	new /obj/effect/temp_visual/forceblast(owner.loc, 0.65 SECONDS, direction.Angle(), 4, "#EE0000")
+	spawn(1.5)
+		new /obj/effect/temp_visual/forceblast(owner.loc, 0.65 SECONDS, direction.Angle(), 4, "#EE0000")
+	spawn(3)
+		new /obj/effect/temp_visual/forceblast(owner.loc, 0.65 SECONDS, direction.Angle(), 4, "#EE0000")
+
+	for(var/turf/T as anything in get_cone(owner.loc, direction, 3, 80))
+		for(var/mob/living/L in T)
+			if(L == owner)
+				continue
+
+			L.take_overall_damage(15)
+//TODO: implement this:
+//			L.Weaken(LEAP_CONE_WEAKEN)
+//			set_extension(owner, /datum/extension/tripod_leap_defense)
+			shake_camera(L,10,3)
+
+	release_vector(direction)
+
+/datum/action/cooldown/necro/high_leap/proc/land_animation()
+	var/matrix/M = matrix()
+	animate(owner, transform = M, pixel_y = -128, alpha = cached_alpha, time = land_time, flags = ANIMATION_RELATIVE)
+
+/datum/action/cooldown/necro/high_leap/proc/winddown()
 	winddown_animation()
-	sleep(winddown_time)
-	stop()
+	UnregisterSignal(owner, list(COMSIG_MOVABLE_PRE_MOVE, COMSIG_MOVABLE_BUMP))
+	StartCooldown()
 
-
-/datum/extension/high_leap/proc/winddown_animation()
-	var/atom/A = holder
-	var/matrix/M = A.get_default_transform()
+/datum/action/cooldown/necro/high_leap/proc/winddown_animation()
+	var/matrix/M = matrix()
 	M = M.Scale(1, 0.8)	//Squish vertically
-	animate(A, transform = M, time = winddown_time * 0.33, pixel_y = A.default_pixel_y - 16, easing = QUAD_EASING, flags = ANIMATION_PARALLEL|ANIMATION_RELATIVE)
-	M = A.get_default_transform()
-	animate(transform = M, pixel_y = A.default_pixel_y, time = winddown_time * 0.66)
-	sleep(windup_time)
-	//Animation
-
-
-
-/datum/extension/high_leap/proc/stop()
-	deltimer(ongoing_timer)
-	stopped_at = world.time
-	ongoing_timer = addtimer(CALLBACK(src, /datum/extension/high_leap/proc/finish_cooldown), cooldown, TIMER_STOPPABLE)
-
-
-/datum/extension/high_leap/proc/finish_cooldown()
-	deltimer(ongoing_timer)
-	remove_extension(holder, base_type)
-
-
-/datum/extension/high_leap/proc/get_cooldown_time()
-	var/elapsed = world.time - stopped_at
-	return cooldown - elapsed
-
-
-
-/*----------------------------------
-	Impact
------------------------------------*/
-/atom/movable/proc/high_leap_impact(var/atom/target, var/distance, var/start_location)
-	return
-
-//When a human does it, we call the same proc on their species. This allows various people to do stuff
-/mob/living/carbon/human/high_leap_impact(var/atom/target, var/distance, var/start_location)
-	shake_camera(src,3,1)
-	if (species)
-		return species.high_leap_impact(src, target, distance, start_location)
-	return ..()
-
-
-/datum/species/proc/high_leap_impact(var/mob/living/user, var/atom/target, var/distance, var/start_location)
-	return
-
-/***********************
-	Safety Checks
-************************/
-//Access Proc
-
-
-/atom/movable/proc/can_high_leap(var/error_messages = TRUE)
-	var/datum/extension/high_leap/E = get_extension(src, /datum/extension/high_leap)
-	if(istype(E))
-		if (error_messages)
-			if (E.stopped_at)
-				to_chat(src, SPAN_NOTICE("[E.name] is cooling down. You can use it again in [E.get_cooldown_time() /10] seconds"))
-			else
-				to_chat(src, SPAN_NOTICE("You're already Leaping"))
-		return FALSE
-
-	return TRUE
-
-/mob/living/can_high_leap(var/error_messages = TRUE)
-	if (incapacitated(INCAPACITATION_IMMOBILE))
-		return FALSE
-
-	.=..()
-
-/atom/movable/proc/high_leap_ability(var/target, var/windup_time, var/winddown_time, var/cooldown, var/minimum_range = 3, var/travel_speed = 4)
-	//First of all, lets check if we're currently able to charge
-	if (!can_high_leap())
-		return FALSE
-
-	//Ok we've passed all safety checks, let's commence charging!
-	//We simply create the extension on the movable atom, and everything works from there
-	set_extension(src, /datum/extension/high_leap, target, windup_time, winddown_time, cooldown, minimum_range, travel_speed)
-	return TRUE
+	animate(owner, transform = M, pixel_y = owner.pixel_y-16, time = winddown_time * 0.333, easing = QUAD_EASING)
+	sleep(winddown_time * 0.333)
+	M = matrix()
+	animate(owner, transform = M, pixel_y = owner.pixel_y+16, time = winddown_time * 0.667)

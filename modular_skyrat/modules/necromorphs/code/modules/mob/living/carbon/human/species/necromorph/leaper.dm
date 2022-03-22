@@ -302,8 +302,8 @@ It can be used to chase down a fleeing opponent, to move along long hallways qui
 
 	var/mob/living/carbon/human/H = src
 
-	if (!H.can_charge(A))
-		return
+//	if (!H.can_charge(A))
+//		return
 
 	var/organ_check = FALSE
 	//The leaper can't leap if its missing too many limbs. Specifically, it must have either:
@@ -334,7 +334,7 @@ It can be used to chase down a fleeing opponent, to move along long hallways qui
 	else
 		H.play_species_audio(H, SOUND_SHOUT, 100, 1, 3)
 
-	return leap_attack(A, _cooldown = 6 SECONDS, _delay = 1.3 SECONDS, _speed = 7, _maxrange = 11,_lifespan = 8 SECONDS, _maxrange = 20)
+//	return leap_attack(A, _cooldown = 6 SECONDS, _delay = 1.3 SECONDS, _speed = 7, _maxrange = 11,_lifespan = 8 SECONDS, _maxrange = 20)
 
 
 /atom/movable/proc/leaper_leap_enhanced(var/mob/living/A)
@@ -359,7 +359,7 @@ It can be used to chase down a fleeing opponent, to move along long hallways qui
 	else
 		H.play_species_audio(H, SOUND_SHOUT, 100, 1, 3)
 
-	return leap_attack(A, _cooldown = 4 SECONDS, _delay = 1 SECONDS, _speed = 8, _maxrange = 11, _lifespan = 8 SECONDS, _maxrange = 20)
+//	return leap_attack(A, _cooldown = 4 SECONDS, _delay = 1 SECONDS, _speed = 8, _maxrange = 11, _lifespan = 8 SECONDS, _maxrange = 20)
 
 
 /atom/movable/proc/leaper_leap_monkey(var/mob/living/A)
@@ -371,8 +371,8 @@ It can be used to chase down a fleeing opponent, to move along long hallways qui
 
 	var/mob/living/carbon/human/H = src
 
-	if (!H.can_charge(A))
-		return
+//	if (!H.can_charge(A))
+//		return
 
 	var/organ_check = FALSE
 	if (H.has_organ(BP_TAIL))
@@ -395,32 +395,32 @@ It can be used to chase down a fleeing opponent, to move along long hallways qui
 	else
 		H.play_species_audio(H, SOUND_SHOUT, 100, 1, 3)
 
-	return leap_attack(A, _cooldown = 4 SECONDS, _delay = 1 SECONDS, _speed = 10, _maxrange = 11, _lifespan = 8 SECONDS, _maxrange = 20)
+//	return leap_attack(A, _cooldown = 4 SECONDS, _delay = 1 SECONDS, _speed = 10, _maxrange = 11, _lifespan = 8 SECONDS, _maxrange = 20)
 
 
 //Special effects for leaper impact, its pretty powerful if it lands on the primary target mob, but it backfires if it was blocked by anything else
-/datum/species/necromorph/leaper/charge_impact(var/datum/extension/charge/leap/charge)
-	.=..()	//We call the parent charge impact too, all the following effects are in addition to the default behaviour
-	var/mob/living/carbon/human/H = charge.user
-	shake_camera(charge.user,5,3)
-	.=TRUE //We stop on the first hit either way
-	//To be considered a success, we must leap onto a mob, and they must be the one we intended to hit
-	if (isliving(charge.last_obstacle))
-		var/mob/living/L = charge.last_obstacle
-		//L.Weaken(stun) //Down they go!
-		//L.apply_damage(leap_damage*(charge.distance_travelled+1), used_weapon = charge.user) //We apply damage based on the distance. We add 1 to the distance because we're moving into their tile too
-		shake_camera(L,5,3)
-		//And lets also land ontop of them
-		H.play_species_audio(H, SOUND_SHOUT, 100, 1, 3) //Victory scream
-		.=FALSE
-		spawn(2)
-			H.Move(charge.last_obstacle.loc)
-	else if (charge.last_obstacle.density)
-	//If something else blocked our leap, or if we hit a dense object (even intentionally) we get pretty rattled
-	//	H.Weaken(2)
-	//	H.apply_damage(15, used_weapon = charge.last_obstacle) //ow
-		H.play_species_audio(H, SOUND_PAIN, VOLUME_MID, 1, 3) //It huuurts
-		.=FALSE
+///datum/species/necromorph/leaper/charge_impact(var/datum/extension/charge/leap/charge)
+//	.=..()	//We call the parent charge impact too, all the following effects are in addition to the default behaviour
+//	var/mob/living/carbon/human/H = charge.user
+//	shake_camera(charge.user,5,3)
+//	.=TRUE //We stop on the first hit either way
+//	//To be considered a success, we must leap onto a mob, and they must be the one we intended to hit
+//	if (isliving(charge.last_obstacle))
+//		var/mob/living/L = charge.last_obstacle
+//		//L.Weaken(stun) //Down they go!
+//		//L.apply_damage(leap_damage*(charge.distance_travelled+1), used_weapon = charge.user) //We apply damage based on the distance. We add 1 to the distance because we're moving into their tile too
+//		shake_camera(L,5,3)
+//		//And lets also land ontop of them
+//		H.play_species_audio(H, SOUND_SHOUT, 100, 1, 3) //Victory scream
+//		.=FALSE
+//		spawn(2)
+//			H.Move(charge.last_obstacle.loc)
+//	else if (charge.last_obstacle.density)
+//	//If something else blocked our leap, or if we hit a dense object (even intentionally) we get pretty rattled
+//	//	H.Weaken(2)
+//	//	H.apply_damage(15, used_weapon = charge.last_obstacle) //ow
+//		H.play_species_audio(H, SOUND_PAIN, VOLUME_MID, 1, 3) //It huuurts
+//		.=FALSE
 
 
 //Tailstrike attack
@@ -432,7 +432,7 @@ It can be used to chase down a fleeing opponent, to move along long hallways qui
 		A = get_step(src, dir)
 
 
-	.=tailstrike_attack(A, _damage = 22.5, _windup_time = 0.75 SECONDS, _winddown_time = 1.2 SECONDS, _cooldown = 0.5)
+//	.=tailstrike_attack(A, _damage = 22.5, _windup_time = 0.75 SECONDS, _winddown_time = 1.2 SECONDS, _cooldown = 0.5)
 	if (.)
 		//The sound has a randomised delay
 		spawn(rand_between(0, 2 SECONDS))
@@ -447,9 +447,9 @@ It can be used to chase down a fleeing opponent, to move along long hallways qui
 		A = get_step(src, dir)
 
 	//The sound has a randomised delay
-	if(tailstrike_attack(A, _damage = 28, _windup_time = 0.6 SECONDS, _winddown_time = 1 SECONDS, _cooldown = 0))
-		spawn(rand_between(0, 1.8 SECONDS))
-			play_species_audio(src, SOUND_ATTACK, 30, 1)
+//	if(tailstrike_attack(A, _damage = 28, _windup_time = 0.6 SECONDS, _winddown_time = 1 SECONDS, _cooldown = 0))
+//		spawn(rand_between(0, 1.8 SECONDS))
+//			play_species_audio(src, SOUND_ATTACK, 30, 1)
 
 /mob/living/carbon/human/proc/tailstrike_leaper_monkey(var/atom/A)
 	set name = "Tail Strike"
@@ -459,9 +459,9 @@ It can be used to chase down a fleeing opponent, to move along long hallways qui
 		A = get_step(src, dir)
 
 	//The sound has a randomised delay
-	if(tailstrike_attack(A, _damage = 14, _windup_time = 0.6 SECONDS, _winddown_time = 0.9 SECONDS, _cooldown = 0.5)) //Monkey has pretty much no stun, therefore a quicker but weaker tailstrike.
-		spawn(rand_between(0, 1.8 SECONDS))
-			play_species_audio(src, SOUND_ATTACK, 30, 1)
+//	if(tailstrike_attack(A, _damage = 14, _windup_time = 0.6 SECONDS, _winddown_time = 0.9 SECONDS, _cooldown = 0.5)) //Monkey has pretty much no stun, therefore a quicker but weaker tailstrike.
+//		spawn(rand_between(0, 1.8 SECONDS))
+//			play_species_audio(src, SOUND_ATTACK, 30, 1)
 
 
 //Gallop ability
@@ -475,8 +475,8 @@ It can be used to chase down a fleeing opponent, to move along long hallways qui
 		return
 
 
-	if (gallop_ability(_duration = 4 SECONDS, _cooldown = 10 SECONDS, _power = 3))
-		H.play_species_audio(H, SOUND_SHOUT, VOLUME_MID, 1, 3)
+//	if (gallop_ability(_duration = 4 SECONDS, _cooldown = 10 SECONDS, _power = 3))
+//		H.play_species_audio(H, SOUND_SHOUT, VOLUME_MID, 1, 3)
 
 /mob/living/proc/leaper_gallop_monkey()
 	set name = "Gallop"
@@ -488,11 +488,11 @@ It can be used to chase down a fleeing opponent, to move along long hallways qui
 		return
 
 
-	if (gallop_ability(_duration = 2 SECONDS, _cooldown = 8 SECONDS, _power = 0.75))
-		H.play_species_audio(H, SOUND_SHOUT, VOLUME_MID, 1, 3)
+//	if (gallop_ability(_duration = 2 SECONDS, _cooldown = 8 SECONDS, _power = 0.75))
+//		H.play_species_audio(H, SOUND_SHOUT, VOLUME_MID, 1, 3)
 
 //Wallrunning
-/datum/species/necromorph/leaper/setup_movement(var/mob/living/carbon/human/H)
-	H.AddComponent(/datum/component/wallrun)
+///datum/species/necromorph/leaper/setup_movement(var/mob/living/carbon/human/H)
+//	H.AddComponent(/datum/component/wallrun)
 
 

@@ -8,15 +8,15 @@
 	screen_loc = "CENTER,TOP:-16"	//Future TODO: Allow some dynamic positioning to accomodate multiple resource meters
 
 
-/atom/movable/screen/meter/resource/cache_data(var/atom/holder, var/datum/hud/H, var/datum/extension/resource/R)
-	resource_holder = R
-	.=..()
-
-/atom/movable/screen/meter/resource/get_data()
-	if (resource_holder)
-		return resource_holder.get_report()
-	else
-		return DEFAULT_METER_DATA
+///atom/movable/screen/meter/resource/cache_data(var/atom/holder, var/datum/hud/H, var/datum/extension/resource/R)
+//	resource_holder = R
+//	.=..()
+//
+///atom/movable/screen/meter/resource/get_data()
+//	if (resource_holder)
+//		return resource_holder.get_report()
+//	else
+//		return DEFAULT_METER_DATA
 
 
 

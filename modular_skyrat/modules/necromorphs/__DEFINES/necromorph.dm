@@ -136,7 +136,7 @@ SPECIES_NECROMORPH_UBERMORPH
 //These flags make sure that variant doesn't appear in places it shouldn't
 #define NECROMORPH_VISUAL_VARIANT	marker_spawnable = FALSE;\
 spawner_spawnable = FALSE;\
-preference_settable = FALSE;\
+always_customizable = FALSE;\
 variants = list();
 
 #define STANDARD_CLOTHING_EXCLUDE_SPECIES	list("exclude", SPECIES_NABBER,SPECIES_ALL_NECROMORPHS)

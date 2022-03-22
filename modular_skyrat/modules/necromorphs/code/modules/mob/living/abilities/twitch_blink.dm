@@ -1,99 +1,59 @@
-/*
-	This is a permanant extension used by the necromorph twitcher. It is added to a twitcher on spawning and stays there forever. It handles a few things:
+//TODO: Implement animation support
+/datum/element/twitch
+	element_flags = ELEMENT_DETACH|ELEMENT_BESPOKE
+	var/movement_blink_chance = 4
+	var/damage_blink_chance = 6
+	var/blink_delay_min = 3 SECONDS
+	var/blink_delay_max = 15 SECONDS
+	var/next_blink = 0
 
-		-Periodic idle twitching animations
-		-Shortrange blinks from charging and reactive
-		-Actively used shortrange blink
+/datum/element/twitch/Attach(datum/target, _movement_blink_chance, _damage_blink_chance, delay_min, delay_max)
+	.=..()
+	if(!ismob(target))
+		return ELEMENT_INCOMPATIBLE
 
-	Its purposes are highly specialised for the twitcher and it shouldn't be used on anyone else
-*/
+	if(!isnull(_movement_blink_chance))
+		movement_blink_chance = _movement_blink_chance
+	if(!isnull(_damage_blink_chance))
+		damage_blink_chance = _damage_blink_chance
+	if(!isnull(delay_min))
+		blink_delay_min = delay_min
+	if(delay_max && delay_max > 0)
+		blink_delay_max = delay_max
 
-/datum/extension/twitch
-	name = "Twitch"
-	expected_type = /mob/living/carbon/human
-	flags = EXTENSION_FLAG_IMMEDIATE
-	var/mob/living/carbon/human/user
+	RegisterSignal(target, COMSIG_MOB_APPLY_DAMAGE, .proc/on_damage)
+	RegisterSignal(target, COMSIG_MOVABLE_MOVED, .proc/on_moved)
 
-	//Twitcher will periodically do idle jerking animations
-	var/idle_delay_min = 3 SECONDS
-	var/idle_delay_max = 15 SECONDS
+/datum/element/twitch/Detach(datum/source)
+	UnregisterSignal(source, list(COMSIG_MOB_APPLY_DAMAGE, COMSIG_MOVABLE_MOVED))
+	.=..()
 
-	//Idle twitching animations
-	var/list/animations = list("twitcher_anim_1", "twitcher_anim_2")
+/datum/element/twitch/proc/on_damage(datum/target, damage, damagetype, def_zone)
+	SIGNAL_HANDLER
+	if(damage && world.time > next_blink && prob(damage_blink_chance))
+		blink(target)
 
-	//Twitchers will blink to an adjacent tile when damaged, this effect has a cooldown
-	var/defensive_displace_cooldown = 3 SECONDS
+/datum/element/twitch/proc/on_moved(atom/movable/target, atom/origin, direction, forced)
+	SIGNAL_HANDLER
+	if(world.time > next_blink && prob(movement_blink_chance))
+		blink(target)
 
-	//Small chance to randomly displace each step taken. This does not trigger the defensive cooldown
-	var/movement_displace_chance = 4
+//Code from dodge.dm
+/datum/element/twitch/proc/blink(mob/holder)
+	var/list/possible_turfs = RANGE_TURFS(1, holder)
+	possible_turfs -= get_turf(holder)
+	possible_turfs -= get_step(holder, holder.dir)
+	possible_turfs -= get_step(holder, DIRFLIP(holder.dir))
 
+	var/turf/target
+	while(possible_turfs.len) //Using while() instead of for() to ensure target turf is randomised
+		target = pick(possible_turfs)
+		if(!target.is_blocked_turf())
+			break
+		possible_turfs -= target
+		target = null
 
-
-
-	//Runtime data
-	var/last_defensive_displace = 0
-	var/idle_twitch_timer
-
-/datum/extension/twitch/New(var/mob/living/carbon/human/_user)
-	..()
-	user = _user
-	GLOB.moved_event.register(user, src, /datum/extension/twitch/proc/moved)
-	set_next_idle_twitch()
-
-
-//This is called after every twitch, idle or active
-/datum/extension/twitch/proc/set_next_idle_twitch()
-	if (idle_twitch_timer)	//Cancel any queued idle
-		deltimer(idle_twitch_timer)
-
-	. = rand_between(idle_delay_min, idle_delay_max)
-	idle_twitch_timer = addtimer(CALLBACK(src, .proc/twitch_animation), ., TIMER_STOPPABLE)
-
-
-//Does an animation. Only if the user is standing up
-	//Can be done while stunned, as part of special abilities
-/datum/extension/twitch/proc/twitch_animation()
-	if (!user.lying)
-		flick(pick(animations), user)
-
-	//Make random sounds sometimes when we twitch.
-	//I originally tested this without a prob call, and it got annoying real fast
-	if (prob(20))
-		var/sound_type = pickweight(list(SOUND_SPEECH = 6, SOUND_ATTACK  = 2, SOUND_PAIN = 1.5, SOUND_SHOUT = 1))
-		user.play_species_audio(user, sound_type, VOLUME_QUIET, 1, -1)
-
-	set_next_idle_twitch()
-
-
-/datum/extension/twitch/proc/moved(var/atom/mover, var/oldloc, var/newloc)
-	//Sometimes blink around while walking
-	if(prob(movement_displace_chance))
-		displace(FALSE)
-
-/datum/extension/twitch/proc/move_to(var/atom/target, var/speed = 10)
-	if (!turf_clear(get_turf(target)))
-		return FALSE
-
-	animate_movement(user, target, speed, client_lag = 0.4)
-	twitch_animation()
-	return TRUE
-
-
-/datum/extension/twitch/proc/displace(var/defensive = FALSE)
-	if (defensive)
-		if (last_defensive_displace + (defensive_displace_cooldown / user.get_attack_speed_factor()) >= world.time)
-			return FALSE //Too soon since last one
-
-
-	var/list/possible = list()
-	for (var/turf/simulated/floor/F in orange(user, 1))
-		if (turf_clear(F))
-			possible.Add(F)
-
-	if (possible.len)
-		if (defensive)
-			last_defensive_displace = world.time
-		move_to(pick(possible), speed = 8)
-		return TRUE
-
-	return FALSE
+	next_blink = world.time + rand(blink_delay_min, blink_delay_max)
+	holder.set_dir_on_move = FALSE
+	holder.Move(target, get_dir(holder, target))
+	holder.set_dir_on_move = TRUE

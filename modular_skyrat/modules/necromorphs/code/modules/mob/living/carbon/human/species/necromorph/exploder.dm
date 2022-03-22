@@ -195,13 +195,13 @@ The last resort. The exploder screams and shakes violently for 3 seconds, before
  This is quite telegraphed and it can give your victims time to back away before the explosion. Not the most ideal way to detonate, but it can be a viable backup if you fail to hit something with charge."
 
 //The exploder periodically makes random sounds
-/datum/species/necromorph/exploder/setup_defense(var/mob/living/carbon/human/H)
-	.=..()
-	set_extension(H,/datum/extension/auto_sound/exploder)
+///datum/species/necromorph/exploder/setup_defense(var/mob/living/carbon/human/H)
+//	.=..()
+//	set_extension(H,/datum/extension/auto_sound/exploder)
+//
 
-
-/datum/extension/auto_sound/exploder
-	valid_sounds = list(SOUND_SHOUT, SOUND_PAIN)
+///datum/extension/auto_sound/exploder
+//	valid_sounds = list(SOUND_SHOUT, SOUND_PAIN)
 
 
 // /datum/unarmed_attack/bite/weak/exploder

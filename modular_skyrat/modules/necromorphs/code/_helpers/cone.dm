@@ -1,3 +1,18 @@
+//Checks if target is within arc degrees either side of a specified direction vector from user. All parameters are mandatory
+//Rounding explained above
+/proc/target_in_arc(var/atom/origin, var/atom/target, var/vector2/direction, var/arc)
+	origin = get_turf(origin)
+	target = get_turf(target)
+	if (origin == target)
+		return TRUE
+
+	var/vector2/dirvector = direction.Copy()
+	var/vector2/dotvector = get_new_vector(target.x - origin.x, target.y - origin.y)
+	dotvector.SelfNormalize()
+	.= (round(dirvector.Dot(dotvector),0.000001) >= round(cos(arc),0.000001))
+	release_vector(dotvector)
+	release_vector(dirvector)
+
 //This proc returns all turfs which fall inside a cone stretching Distance tiles from origin, in direction, and being angle degrees wide
 /proc/get_cone(var/turf/origin, var/vector2/direction, var/distance, var/angle)
 
@@ -21,11 +36,11 @@
 
 		//And from this halfpoint, lets get a square area of turfs which is every possible turf that could be in the cone
 		//We use half the distance as radius, +1 to account for any rounding errors. Its not a big deal if we get some unnecessary turfs in here
-		turfs = trange(((distance*0.5) + 1), halfpoint)
+		turfs = RANGE_TURFS(((distance*0.5) + 1), halfpoint)
 
 	else
 		//Optimisation
-		turfs = trange(distance, origin)
+		turfs = RANGE_TURFS(distance, origin)
 
 	//Alright next up, we loop through the turfs. for each one:
 	if (angle < 360)
@@ -53,29 +68,19 @@
 	//Alright we've removed all the turfs which aren't in the cone!
 	return turfs
 
-/proc/get_view_cone(var/turf/origin, var/vector2/direction, var/distance, var/angle)
-	if (!istype(origin))
-		origin = get_turf(origin)
-	var/list/viewlist = origin.turfs_in_view(distance)
-	var/list/conelist = get_cone(origin, direction, distance, angle)
-
-	var/list/all = (viewlist & conelist)
-
-	return all
-
 //This hella complex proc gets a cone, but divided into several smaller cones. Returns a list of lists, each containing the tiles of the subcone
 //No overlapping is allowed, each subcone contains a unique list
-/proc/get_multistage_cone(var/turf/origin, var/vector2/direction, var/distance, var/angle, var/stages = 5, var/clock_direction = CLOCKWISE)
+/proc/get_multistage_cone(turf/origin, vector2/direction, distance, angle, stages = 5, clock_direction = ROTATION_CLOCKWISE)
 	var/subcone_angle = angle / stages
 	var/vector2/subcone_direction
 
 	//If clockwise, we rotate anticlockwise to the start, by half of the main angle minus half of the subcone angle
-	if (clock_direction == CLOCKWISE)
+	if (clock_direction == ROTATION_CLOCKWISE)
 		//And after this we'll add the subcone angle to eacch direction to get the next subcone centre
 		subcone_direction = direction.Turn((angle*0.5 - subcone_angle*0.5)*-1)
 
 	//If clockwise, we rotate clockwise to the end, by half of the main angle minus half of the subcone angle
-	else if (clock_direction == ANTICLOCKWISE)
+	else if (clock_direction == ROTATION_COUNTERCLOCKWISE)
 		subcone_direction = direction.Turn(angle*0.5 - subcone_angle*0.5)
 		subcone_angle *= -1	//And we invert the subcone angle, since we'll still be adding it
 

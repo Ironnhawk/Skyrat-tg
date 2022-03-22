@@ -188,7 +188,7 @@
 		alpha = default_alpha
 
 /atom/proc/shake_animation(var/intensity = 8)
-	var/initial_transform = new/matrix(transform)
+	var/matrix/initial_transform = matrix(transform)
 	var/init_px = pixel_x
 	var/shake_dir = pick(-1, 1)
 	var/rotation = 2+soft_cap(intensity, 1, 1, 0.94)

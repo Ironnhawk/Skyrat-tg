@@ -1,95 +1,81 @@
-/*
-	Autosound
-	This simple extension periodically plays audio files.
+#define MOB_ANY_STATE 0
+#define MOB_CONTROLLED 1
+#define MOB_NOT_CONTROLLED 2
 
-	Mainly used for necromorphs that should be noisy, to prevent uncharacteristic stealth
-	Make subtypes of it for whatever you want to do
-*/
-//auto_sound
-//Auto Sound
-//making sounds
-///mob/living/carbon/human
-/datum/extension/auto_sound
-	name = "Auto Sound"
-	base_type = /datum/extension/auto_sound
-	expected_type = /mob/living/carbon/human
-	flags = EXTENSION_FLAG_IMMEDIATE
-
-
-	var/mob/living/carbon/human/user
+/datum/element/auto_sound
+	element_flags = ELEMENT_DETACH|ELEMENT_BESPOKE
 	var/volume = VOLUME_MID
 	var/extrarange = 2
-
 	//A list of SOUND_X defines indicating what type of sound to play
 	var/list/valid_sounds = list(SOUND_SHOUT)
-
 	//If true, only play sounds when a client is controlling the mob
 	//If false, only play when not controlled
 	//If null, play in both states
-	var/require_client = TRUE
-
+	var/play_when = MOB_ANY_STATE
 	//How often to try to play sounds
 	var/interval = 20 SECONDS
-
 	//Random variation either side of interval
-	var/variation = 0.15
-
+	var/variation = 15
 	//Chance on each attempt, to actually play a sound
 	var/probability = 50
+	//Assoc list, holder = timer id
+	var/list/timer_ids = list()
 
-
-	var/ongoing_timer
-	var/started_at
-	var/stopped_at
-
-
-
-/datum/extension/auto_sound/New(var/mob/living/carbon/human/_user)
+/datum/element/auto_sound/Attach(datum/holder ,_volume, _extrarange, _play_when, _interval, _variation, _probability, _playing, ...)
 	.=..()
-	user = _user
-	ongoing_timer = addtimer(CALLBACK(src, /datum/extension/auto_sound/proc/start), 0, TIMER_STOPPABLE)
-	start()
+	if(!ismob(holder))
+		return ELEMENT_INCOMPATIBLE
 
+	if(_volume)
+		volume = _volume
+	if(!isnull(_extrarange))
+		extrarange = _extrarange
+	if(!isnull(_play_when))
+		play_when = _play_when
+	if(_interval && _interval > 0) // Interval shouldn't be 0 or lower
+		interval = _interval
+	if(_variation)
+		variation = _variation
+	if(_probability)
+		probability = _probability
 
-/datum/extension/auto_sound/proc/start()
-	started_at	=	world.time
+	//Using args instead of list() to ensure there will be no duplicate elements (check how it calculates id)
+	if(args.len > 8)
+		valid_sounds = args.Copy(9, args.len)
 
-	var/delay = (interval * (1+ (rand(-variation, variation))))
-	ongoing_timer = addtimer(CALLBACK(src, /datum/extension/auto_sound/proc/try_play_sound), delay, TIMER_STOPPABLE)
+	if(variation >= interval)
+		stack_trace("Tried adding auto_sound element with variation bigger then interval. Setting variation to interval-1.")
+		variation = interval - 1
 
+	timer_ids[holder] = addtimer(CALLBACK(src, .proc/try_play_sound, holder), (interval+rand(-variation, variation)), TIMER_STOPPABLE|TIMER_DELETE_ME)
 
-/datum/extension/auto_sound/proc/can_play_sound()
-	if (QDELETED(user) || user.stat == DEAD)
-		stop()
+/datum/element/auto_sound/Detach(datum/target)
+	deltimer(timer_ids[target])
+	timer_ids -= target
+	.=..()
+
+/datum/element/auto_sound/proc/can_play_sound(mob/holder)
+	if(holder.stat == DEAD)
 		return FALSE
 
-	if (!isnull(require_client))
-		var/hasclient = FALSE
-		if (user.client)
-			hasclient = TRUE
-		if (hasclient != require_client)
+	if(play_when)
+		if(play_when == MOB_CONTROLLED)
+			if(holder.client)
+				return TRUE
 			return FALSE
-
+		else
+			if(!holder.client)
+				return TRUE
+			return FALSE
 	return TRUE
 
+/datum/element/auto_sound/proc/try_play_sound(mob/holder)
+	if(can_play_sound(holder))
+		if(prob(probability))
+			holder.play_species_audio(holder, pick(valid_sounds), volume, TRUE, extrarange)
 
-/datum/extension/auto_sound/proc/try_play_sound()
-	if (can_play_sound())
+	timer_ids[holder] = addtimer(CALLBACK(src, .proc/try_play_sound, holder), (interval+rand(-variation, variation)), TIMER_STOPPABLE|TIMER_DELETE_ME)
 
-		if (prob(probability))
-			user.play_species_audio(user, pick(valid_sounds), volume, TRUE, extrarange)
-
-	//The safety check may have stopped us
-	if (!stopped_at)
-
-		var/delay = (interval * (1+ (rand(-variation, variation))))
-		ongoing_timer = addtimer(CALLBACK(src, /datum/extension/auto_sound/proc/try_play_sound), delay, TIMER_STOPPABLE)
-
-/datum/extension/auto_sound/proc/stop()
-	deltimer(ongoing_timer)
-	stopped_at = world.time
-	remove_extension(holder, base_type)
-
-
-
-
+#undef MOB_ANY_STATE
+#undef MOB_CONTROLLED
+#undef MOB_NOT_CONTROLLED

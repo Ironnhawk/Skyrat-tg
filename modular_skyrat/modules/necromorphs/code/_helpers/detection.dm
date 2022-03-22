@@ -11,7 +11,3 @@
 
 /area/get_toplevel_atom()
 	return src
-
-/proc/trange(rad = 0, turf/centre = null) //alternative to range (ONLY processes turfs and thus less intensive)
-	if(!centre)
-		return
