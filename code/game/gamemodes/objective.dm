@@ -128,9 +128,12 @@ GLOBAL_LIST_EMPTY(objectives) //SKYRAT EDIT ADDITION
 			continue
 		if(possible_target in blacklist)
 			continue
-		// SKYRAT EDIT ADDITION START - Players in the interlink can't be obsession targets
+		// SKYRAT EDIT ADDITION
 		if(SSticker.IsRoundInProgress() && istype(target_area, /area/centcom/interlink))
 			continue
+		if(!count_space_areas)
+			if(istype(target_area, /area/space) || istype(target_area, /area/ruin) || istype(target_area, /area/icemoon) || istype(target_area, /area/lavaland))
+				continue
 		// SKYRAT EDIT END
 		possible_targets += possible_target
 	if(try_target_late_joiners)
@@ -173,7 +176,7 @@ GLOBAL_LIST_EMPTY(objectives) //SKYRAT EDIT ADDITION
 	clothes_req = FALSE
 	nonabstract_req = TRUE
 	phase_allowed = TRUE
-	antimagic_allowed = TRUE
+	antimagic_flags = NONE
 	invocation_type = INVOCATION_NONE
 
 /obj/effect/proc_holder/spell/self/special_equipment_fallback/cast(list/targets, mob/user)
@@ -289,7 +292,7 @@ GLOBAL_LIST_EMPTY(objectives) //SKYRAT EDIT ADDITION
 
 
 /datum/objective/protect/check_completion()
-	var/obj/item/organ/brain/brain_target
+	var/obj/item/organ/internal/brain/brain_target
 	if(human_check)
 		brain_target = target.current?.getorganslot(ORGAN_SLOT_BRAIN)
 	//Protect will always suceed when someone suicides
@@ -659,7 +662,7 @@ GLOBAL_LIST_EMPTY(possible_items_special)
 
 /datum/objective/capture/check_completion()//Basically runs through all the mobs in the area to determine how much they are worth.
 	var/captured_amount = 0
-	var/area/centcom/holding/A = GLOB.areas_by_type[/area/centcom/holding]
+	var/area/centcom/central_command_areas/holding/A = GLOB.areas_by_type[/area/centcom/central_command_areas/holding]
 	for(var/mob/living/carbon/human/M in A)//Humans.
 		if(ismonkey(M))
 			captured_amount+=0.1

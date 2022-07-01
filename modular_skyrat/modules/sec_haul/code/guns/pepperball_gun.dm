@@ -1,6 +1,6 @@
 /obj/item/gun/ballistic/automatic/pistol/pepperball
-	name = "\improper Armadyne Pepperball AHG"
-	desc = "A fantastically shit weapon used for self defence and created for the sole purpose of underfunded security forces, meet the Pepperball AHG."
+	name = "\improper Bolt Pepperball AHG"
+	desc = "An incredibly mediocre 'firearm' designed to fire soft pepper balls meant to easily subdue targets."
 	icon = 'modular_skyrat/modules/sec_haul/icons/guns/pepperball.dmi'
 	icon_state = "peppergun"
 	w_class = WEIGHT_CLASS_NORMAL
@@ -11,11 +11,13 @@
 	lock_back_sound = 'sound/weapons/gun/pistol/slide_lock.ogg'
 	bolt_drop_sound = 'sound/weapons/gun/pistol/slide_drop.ogg'
 	realistic = TRUE
-	can_flashlight = TRUE
 	dirt_modifier = 2
 	emp_damageable = TRUE
-	armadyne = TRUE
 	fire_sound_volume = 50
+	company_flag = COMPANY_BOLT
+
+/obj/item/gun/ballistic/automatic/pistol/pepperball/add_seclight_point()
+	AddComponent(/datum/component/seclite_attachable, light_overlay_icon = 'icons/obj/guns/flashlights.dmi', light_overlay = "flight")
 
 /obj/item/ammo_box/magazine/pepperball
 	name = "pistol magazine (pepperball)"
@@ -63,7 +65,7 @@
 	materials = list(/datum/material/iron = 5000)
 	build_path = /obj/item/ammo_box/advanced/pepperballs
 	category = list("intial", "Security", "Ammo")
-	departmental_flags = DEPARTMENTAL_FLAG_SECURITY
+	departmental_flags = DEPARTMENT_BITFLAG_SECURITY
 
 /obj/item/ammo_box/advanced/pepperballs
 	name = "pepperball ammo box"

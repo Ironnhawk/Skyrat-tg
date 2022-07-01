@@ -14,11 +14,10 @@
 		If you have no targets, stand on a transmutation rune and invoke it to aquire some."
 	required_atoms = list(/mob/living/carbon/human = 1)
 	cost = 0
+	priority = MAX_KNOWLEDGE_PRIORITY // Should be at the top
 	route = PATH_START
 	/// Whether we've generated a heretic sacrifice z-level yet, from any heretic.
 	var/static/heretic_level_generated = FALSE
-	/// If TRUE, we skip the ritual when our target list is empty. Done to avoid locking up the heretic.
-	var/skip_this_ritual = FALSE
 	/// A weakref to the mind of our heretic.
 	var/datum/mind/heretic_mind
 	/// Lazylist of minds that we won't pick as targets.
@@ -48,38 +47,45 @@
 		CRASH("Failed to initialize heretic sacrifice z-level!")
 
 /datum/heretic_knowledge/hunt_and_sacrifice/recipe_snowflake_check(mob/living/user, list/atoms, list/selected_atoms, turf/loc)
-	// We've got no targets set, let's try to set some. Adds the user to the list of atoms,
-	// then returns TRUE if skip_this_ritual is FALSE and the user's on top of the rune.
-	// If skip_this_ritual is TRUE, returns FALSE to fail the check and move onto the next ritual.
 	var/datum/antagonist/heretic/heretic_datum = IS_HERETIC(user)
-	var/obj/item/organ/our_living_heart = user.getorganslot(heretic_datum.living_heart_organ_slot)
-	if(!our_living_heart || !HAS_TRAIT(our_living_heart, TRAIT_LIVING_HEART))
+	// First we have to check if the heretic has a Living Heart.
+	// You may wonder why we don't straight up prevent them from invoking the ritual if they don't have one -
+	// Hunt and sacrifice should always be invokable for clarity's sake, even if it'll fail immediately.
+	if(heretic_datum.has_living_heart() != HERETIC_HAS_LIVING_HEART)
+		loc.balloon_alert(user, "ritual failed, no living heart!")
 		return FALSE
 
+	// We've got no targets set, let's try to set some.
+	// If we recently failed to aquire targets, we will be unable to aquire any.
 	if(!LAZYLEN(heretic_datum.sac_targets))
-		if(skip_this_ritual)
-			return FALSE
-
 		atoms += user
-		return (user in range(1, loc))
+		return TRUE
 
-	// Determine if livings in our atoms are valid
+	// If we have targets, we can check to see if we can do a sacrifice
+	// Let's remove any humans in our atoms list that aren't a sac target
 	for(var/mob/living/carbon/human/sacrifice in atoms)
 		// If the mob's not in soft crit or worse, or isn't one of the sacrifices, remove it from the list
-		if(sacrifice.stat < SOFT_CRIT || !(WEAKREF(sacrifice) in heretic_datum.sac_targets))
+		if(sacrifice.stat < SOFT_CRIT || !(sacrifice in heretic_datum.sac_targets))
 			atoms -= sacrifice
 
-	// Finally, return TRUE if we have a mob remaining in our list
-	// Otherwise, return FALSE and stop the ritual
-	return !!(locate(/mob/living/carbon/human) in atoms)
+	// Finally, return TRUE if we have a target in the list
+	if(locate(/mob/living/carbon/human) in atoms)
+		return TRUE
+
+	// or FALSE if we don't
+	loc.balloon_alert(user, "ritual failed, no sacrifice found!")
+	return FALSE
 
 /datum/heretic_knowledge/hunt_and_sacrifice/on_finished_recipe(mob/living/user, list/selected_atoms, turf/loc)
 	var/datum/antagonist/heretic/heretic_datum = IS_HERETIC(user)
-	if(LAZYLEN(heretic_datum.sac_targets))
-		sacrifice_process(user, selected_atoms, loc)
-	else
-		obtain_targets(user)
+	if(!LAZYLEN(heretic_datum.sac_targets))
+		if(obtain_targets(user))
+			return TRUE
+		else
+			loc.balloon_alert(user, "ritual failed, no targets found!")
+			return FALSE
 
+	sacrifice_process(user, selected_atoms, loc)
 	return TRUE
 
 /**
@@ -106,9 +112,7 @@
 
 	if(!length(valid_targets))
 		if(!silent)
-			to_chat(user, span_danger("No sacrifice targets could be found! Attempt the ritual later."))
-		skip_this_ritual = TRUE
-		addtimer(VARSET_CALLBACK(src, skip_this_ritual, FALSE), 5 MINUTES)
+			to_chat(user, span_hierophant_warning("No sacrifice targets could be found!"))
 		return FALSE
 
 	// Now, let's try to get four targets.
@@ -175,12 +179,12 @@
 	var/mob/living/carbon/human/sacrifice = locate() in selected_atoms
 	if(!sacrifice)
 		CRASH("[type] sacrifice_process didn't have a human in the atoms list. How'd it make it so far?")
-	if(!(WEAKREF(sacrifice) in heretic_datum.sac_targets))
+	if(!(sacrifice in heretic_datum.sac_targets))
 		CRASH("[type] sacrifice_process managed to get a non-target human. This is incorrect.")
 
 	if(sacrifice.mind)
 		LAZYADD(target_blacklist, sacrifice.mind)
-	LAZYREMOVE(heretic_datum.sac_targets, WEAKREF(sacrifice))
+	heretic_datum.remove_sacrifice_target(sacrifice)
 
 	to_chat(user, span_hypnophrase("Your patrons accepts your offer."))
 
@@ -189,7 +193,7 @@
 		heretic_datum.high_value_sacrifices++
 
 	heretic_datum.total_sacrifices++
-	heretic_datum.knowledge_points += 2
+	heretic_datum.knowledge_points += 4 //SKYRAT EDIT - ORIGINAL: 2
 
 	if(!begin_sacrifice(sacrifice))
 		disembowel_target(sacrifice)
@@ -222,11 +226,11 @@
 	sac_target.set_handcuffed(new /obj/item/restraints/handcuffs/energy/cult(sac_target))
 	sac_target.update_handcuffed()
 	sac_target.adjustOrganLoss(ORGAN_SLOT_BRAIN, 85, 150)
-	sac_target.do_jitter_animation(100)
+	sac_target.do_jitter_animation()
 	log_combat(heretic_mind.current, sac_target, "sacrificed")
 
-	addtimer(CALLBACK(sac_target, /mob/living/carbon.proc/do_jitter_animation, 100), SACRIFICE_SLEEP_DURATION * (1/3))
-	addtimer(CALLBACK(sac_target, /mob/living/carbon.proc/do_jitter_animation, 100), SACRIFICE_SLEEP_DURATION * (2/3))
+	addtimer(CALLBACK(sac_target, /mob/living/carbon.proc/do_jitter_animation), SACRIFICE_SLEEP_DURATION * (1/3))
+	addtimer(CALLBACK(sac_target, /mob/living/carbon.proc/do_jitter_animation), SACRIFICE_SLEEP_DURATION * (2/3))
 
 	// If our target is dead, try to revive them
 	// and if we fail to revive them, don't proceede the chain
@@ -307,8 +311,8 @@
 
 	sac_target.flash_act()
 	sac_target.blur_eyes(15)
-	sac_target.Jitter(10)
-	sac_target.Dizzy(10)
+	sac_target.set_timed_status_effect(20 SECONDS, /datum/status_effect/jitter, only_if_higher = TRUE)
+	sac_target.set_timed_status_effect(20 SECONDS, /datum/status_effect/dizziness, only_if_higher = TRUE)
 	sac_target.hallucination += 12
 	sac_target.emote("scream")
 
@@ -359,16 +363,15 @@
 	SEND_SIGNAL(sac_target, COMSIG_CLEAR_MOOD_EVENT, "shadow_realm")
 
 	// Wherever we end up, we sure as hell won't be able to explain
-	sac_target.slurring += 20
-	sac_target.cultslurring += 20
-	sac_target.stuttering += 20
+	sac_target.adjust_timed_status_effect(40 SECONDS, /datum/status_effect/speech/slurring/heretic)
+	sac_target.adjust_timed_status_effect(40 SECONDS, /datum/status_effect/speech/stutter)
 
 	// They're already back on the station for some reason, don't bother teleporting
 	if(is_station_level(sac_target.z))
 		return
 
 	// Teleport them to a random safe coordinate on the station z level.
-	var/turf/open/floor/safe_turf = find_safe_turf(extended_safety_checks = TRUE)
+	var/turf/open/floor/safe_turf = get_safe_random_station_turf()
 	var/obj/effect/landmark/observer_start/backup_loc = locate(/obj/effect/landmark/observer_start) in GLOB.landmarks_list
 	if(!safe_turf)
 		safe_turf = get_turf(backup_loc)
@@ -428,10 +431,10 @@
 
 	// Oh god where are we?
 	sac_target.flash_act()
-	sac_target.add_confusion(60)
-	sac_target.Jitter(60)
+	sac_target.adjust_timed_status_effect(60 SECONDS, /datum/status_effect/confusion)
+	sac_target.set_timed_status_effect(120 SECONDS, /datum/status_effect/jitter, only_if_higher = TRUE)
 	sac_target.blur_eyes(50)
-	sac_target.Dizzy(30)
+	sac_target.set_timed_status_effect(1 MINUTES, /datum/status_effect/dizziness, only_if_higher = TRUE)
 	sac_target.AdjustKnockdown(80)
 	sac_target.adjustStaminaLoss(120)
 

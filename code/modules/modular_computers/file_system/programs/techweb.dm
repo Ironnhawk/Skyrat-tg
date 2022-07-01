@@ -1,18 +1,19 @@
 /datum/computer_file/program/science
 	filename = "experi_track"
 	filedesc = "Nanotrasen Science Hub"
+	category = PROGRAM_CATEGORY_SCI
 	program_icon_state = "research"
 	extended_desc = "Connect to the internal science server in order to assist in station research efforts."
 	requires_ntnet = TRUE
-	size = 16
+	size = 10
 	tgui_id = "NtosTechweb"
 	program_icon = "atom"
-	required_access = ACCESS_HEADS
-	transfer_access = ACCESS_RD
+	required_access = list(ACCESS_COMMAND, ACCESS_RESEARCH)
+	transfer_access = list(ACCESS_RESEARCH)
 	/// Reference to global science techweb
 	var/datum/techweb/stored_research
 	/// Access needed to lock/unlock the console
-	var/lock_access = ACCESS_RND
+	var/lock_access = ACCESS_RESEARCH
 	/// Determines if the console is locked, and consequently if actions can be performed with it
 	var/locked = FALSE
 	/// Used for compressing data sent to the UI via static_data as payload size is of concern

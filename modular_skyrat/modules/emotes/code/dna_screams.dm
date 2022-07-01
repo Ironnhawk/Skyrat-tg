@@ -2,10 +2,6 @@
 	var/list/screamsounds = list('modular_skyrat/modules/emotes/sound/voice/scream_m1.ogg', 'modular_skyrat/modules/emotes/sound/voice/scream_m2.ogg')
 	var/list/femalescreamsounds = list('modular_skyrat/modules/emotes/sound/voice/scream_f1.ogg', 'modular_skyrat/modules/emotes/sound/voice/scream_f2.ogg')
 
-/datum/species/synth
-	screamsounds = list('modular_skyrat/modules/emotes/sound/voice/scream_silicon.ogg')
-	femalescreamsounds = null //Unisex screams, defaults to male.
-
 /datum/species/robotic
 	screamsounds = list('modular_skyrat/modules/emotes/sound/voice/scream_silicon.ogg')
 	femalescreamsounds = null
@@ -52,6 +48,10 @@
 	femalescreamsounds = null
 
 /datum/species/vox
+	screamsounds = list('modular_skyrat/modules/emotes/sound/emotes/voxscream.ogg')
+	femalescreamsounds = null
+
+/datum/species/vox_primalis
 	screamsounds = list('modular_skyrat/modules/emotes/sound/emotes/voxscream.ogg')
 	femalescreamsounds = null
 

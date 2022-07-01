@@ -40,7 +40,7 @@
 /obj/structure/closet/crate/secure/engineering,
 /obj/item/pickaxe/drill/jackhammer,
 /obj/item/gun/energy/plasmacutter/adv,
-/obj/effect/spawner/random/medical/firstaid,
+/obj/effect/spawner/random/medical/medkit,
 /turf/open/floor/plating,
 /area/ruin/unpowered/no_grav)
 "v" = (
@@ -53,7 +53,7 @@
 /area/ruin/unpowered/no_grav)
 "y" = (
 /obj/machinery/door/airlock/maintenance{
-	req_access_txt = "12"
+	req_access = list("maint_tunnels")
 	},
 /turf/open/floor/plating,
 /area/ruin/unpowered/no_grav)

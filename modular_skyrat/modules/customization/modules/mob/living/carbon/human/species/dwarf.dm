@@ -1,8 +1,7 @@
 /datum/species/dwarf
 	name = "Dwarf"
 	id = SPECIES_DWARF
-	limbs_id = SPECIES_HUMAN
-	default_color = "#FFFFFF"
+	examine_limb_id = SPECIES_HUMAN
 	say_mod = "bellows"
 	species_traits = list(
 		EYECOLOR,
@@ -17,6 +16,7 @@
 		TRAIT_ADVANCEDTOOLUSER,
 		TRAIT_CAN_STRIP,
 		TRAIT_CAN_USE_FLIGHT_POTION,
+		TRAIT_LITERATE,
 	)
 	use_skintones = 1
 	skinned_type = /obj/item/stack/sheet/animalhide/human
@@ -26,3 +26,9 @@
 	disliked_food = JUNKFOOD | FRIED | CLOTH //Dwarves hate foods that have no nutrition other than alcohol.
 	species_language_holder = /datum/language_holder/dwarf
 	learnable_languages = list(/datum/language/common, /datum/language/dwarf)
+
+/datum/species/dwarf/get_species_description()
+	return placeholder_description
+
+/datum/species/dwarf/get_species_lore()
+	return list(placeholder_lore)

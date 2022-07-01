@@ -44,7 +44,7 @@
 	SIGNAL_HANDLER
 
 	if(item.force >= 5 || item.throwforce >= 5 || item.override_notes || item.offensive_notes || attached_proc) /// Only show this tag for items that could feasibly be weapons, shields, or those that have special notes
-		examine_texts += span_notice("It appears to have an ever-updating bluespace <a href='?src=[REF(item)];examine=1'>warning label.</a>")
+		examine_texts += span_notice("OOC: It has an ever-updating bluespace <a href='?src=[REF(item)];examine=1'>warning label.</a>") //SKYRAT EDIT ORIGINAL: ("It appears to have an ever-updating bluespace <a href='?src=[REF(item)];examine=1'>warning label.</a>")
 
 /**
  *
@@ -62,7 +62,7 @@
 	SIGNAL_HANDLER
 
 	if(href_list["examine"])
-		to_chat(user, span_notice(examine_block("[build_label_text(source)]"))) //SKYRAT EDIT CHANGE
+		to_chat(user, span_notice(examine_block("[build_label_text(source)]")))
 
 /**
  *

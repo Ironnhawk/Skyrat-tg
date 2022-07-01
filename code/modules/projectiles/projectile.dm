@@ -93,6 +93,8 @@
 	var/ricochet_auto_aim_angle = 30
 	/// the angle of impact must be within this many degrees of the struck surface, set to 0 to allow any angle
 	var/ricochet_incidence_leeway = 40
+	/// Can our ricochet autoaim hit our firer?
+	var/ricochet_shoots_firer = TRUE
 
 	///If the object being hit can pass ths damage on to something else, it should not do it for this bullet
 	var/force_hit = FALSE
@@ -132,7 +134,7 @@
 	var/damage_type = BRUTE //BRUTE, BURN, TOX, OXY, CLONE are the only things that should be in here
 	var/nodamage = FALSE //Determines if the projectile will skip any damage inflictions
 	///Defines what armor to use when it hits things.  Must be set to bullet, laser, energy, or bomb
-	var/flag = BULLET
+	var/armor_flag = BULLET
 	///How much armor this projectile pierces.
 	var/armour_penetration = 0
 	///Whether or not our bullet lacks penetrative power, and is easily stopped by armor.
@@ -142,21 +144,28 @@
 	var/decayedRange //stores original range
 	var/reflect_range_decrease = 5 //amount of original range that falls off when reflecting, so it doesn't go forever
 	var/reflectable = NONE // Can it be reflected or not?
-		//Effects
+	// Status effects applied on hit
 	var/stun = 0
 	var/knockdown = 0
 	var/paralyze = 0
 	var/immobilize = 0
 	var/unconscious = 0
-	var/stutter = 0
-	var/slur = 0
 	var/eyeblur = 0
 	var/drowsy = 0
+	/// Jittering applied on projectile hit
+	var/jitter = 0 SECONDS
+	/// Extra stamina damage applied on projectile hit (in addition to the main damage)
 	var/stamina = 0
-	var/jitter = 0
+	/// Stuttering applied on projectile hit
+	var/stutter = 0 SECONDS
+	/// Slurring applied on projectile hit
+	var/slur = 0 SECONDS
+
 	var/dismemberment = 0 //The higher the number, the greater the bonus to dismembering. 0 will not dismember at all.
 	var/impact_effect_type //what type of impact effect to show when hitting something
 	var/log_override = FALSE //is this type spammed enough to not log? (KAs)
+	/// We ignore mobs with these factions.
+	var/list/ignored_factions
 
 	///If defined, on hit we create an item of this type then call hitby() on the hit target with this, mainly used for embedding items (bullets) in targets
 	var/shrapnel_type
@@ -173,6 +182,13 @@
 	var/static/list/projectile_connections = list(
 		COMSIG_ATOM_ENTERED = .proc/on_entered,
 	)
+	//SKYRAT ADDITION START
+	/// If this should be able to hit the target even on direct firing when `ignored_factions` applies
+	var/ignore_direct_target = FALSE
+	//SKYRAT ADDITION END
+
+	/// If true directly targeted turfs can be hit
+	var/can_hit_turfs = FALSE
 
 /obj/projectile/Initialize(mapload)
 	. = ..()
@@ -319,7 +335,7 @@
 	if(firer && HAS_TRAIT(firer, TRAIT_NICE_SHOT))
 		best_angle += NICE_SHOT_RICOCHET_BONUS
 	for(var/mob/living/L in range(ricochet_auto_aim_range, src.loc))
-		if(L.stat == DEAD || !is_in_sight(src, L))
+		if(L.stat == DEAD || !is_in_sight(src, L) || (!ricochet_shoots_firer && L == firer))
 			continue
 		var/our_angle = abs(closer_angle_difference(Angle, get_angle(src.loc, L.loc)))
 		if(our_angle < best_angle)
@@ -446,34 +462,38 @@
  * 0. Anything that is already in impacted is ignored no matter what. Furthermore, in any bracket, if the target atom parameter is in it, that's hit first.
  * Furthermore, can_hit_target is always checked. This (entire proc) is PERFORMANCE OVERHEAD!! But, it shouldn't be ""too"" bad and I frankly don't have a better *generic non snowflakey* way that I can think of right now at 3 AM.
  * FURTHERMORE, mobs/objs have a density check from can_hit_target - to hit non dense objects over a turf, you must click on them, same for mobs that usually wouldn't get hit.
- * 1. The thing originally aimed at/clicked on
- * 2. Mobs - picks lowest buckled mob to prevent scarp piggybacking memes
- * 3. Objs
- * 4. Turf
- * 5. Nothing
+ * 1. Special check on what we bumped to see if it's a border object that intercepts hitting anything behind it
+ * 2. The thing originally aimed at/clicked on
+ * 3. Mobs - picks lowest buckled mob to prevent scarp piggybacking memes
+ * 4. Objs
+ * 5. Turf
+ * 6. Nothing
  */
 /obj/projectile/proc/select_target(turf/our_turf, atom/target, atom/bumped)
-	// 1. original
+	// 1. special bumped border object check
+	if((bumped?.flags_1 & ON_BORDER_1) && can_hit_target(bumped, original == bumped, FALSE, TRUE))
+		return bumped
+	// 2. original
 	if(can_hit_target(original, TRUE, FALSE, original == bumped))
 		return original
 	var/list/atom/considering = list()  // let's define this ONCE
-	// 2. mobs
+	// 3. mobs
 	for(var/mob/living/iter_possible_target in our_turf)
 		if(can_hit_target(iter_possible_target, iter_possible_target == original, TRUE, iter_possible_target == bumped))
 			considering += iter_possible_target
 	if(considering.len)
 		var/mob/living/hit_living = pick(considering)
 		return hit_living.lowest_buckled_mob()
-	// 3. objs and other dense things
+	// 4. objs and other dense things
 	for(var/i in our_turf)
 		if(can_hit_target(i, i == original, TRUE, i == bumped))
 			considering += i
 	if(considering.len)
 		return pick(considering)
-	// 4. turf
+	// 5. turf
 	if(can_hit_target(our_turf, our_turf == original, TRUE, our_turf == bumped))
 		return our_turf
-	// 5. nothing
+	// 6. nothing
 		// (returns null)
 
 //Returns true if the target atom is on our current turf and above the right layer
@@ -481,7 +501,7 @@
 /obj/projectile/proc/can_hit_target(atom/target, direct_target = FALSE, ignore_loc = FALSE, cross_failed = FALSE)
 	if(QDELETED(target) || impacted[target])
 		return FALSE
-	if(!ignore_loc && (loc != target.loc))
+	if(!ignore_loc && (loc != target.loc) && !(can_hit_turfs && direct_target && loc == target))
 		return FALSE
 	// if pass_flags match, pass through entirely - unless direct target is set.
 	if((target.pass_flags_self & pass_flags) && !direct_target)
@@ -490,11 +510,15 @@
 		var/mob/M = firer
 		if((target == firer) || ((target == firer.loc) && ismecha(firer.loc)) || (target in firer.buckled_mobs) || (istype(M) && (M.buckled == target)))
 			return FALSE
+	if(ignored_factions?.len && ismob(target) && (!direct_target || ignore_direct_target)) //SKYRAT EDIT: ignore_direct_target
+		var/mob/target_mob = target
+		if(faction_check(target_mob.faction, ignored_factions))
+			return FALSE
 	if(target.density || cross_failed) //This thing blocks projectiles, hit it regardless of layer/mob stuns/etc.
 		return TRUE
 	if(!isliving(target))
 		if(isturf(target)) // non dense turfs
-			return FALSE
+			return can_hit_turfs && direct_target
 		if(target.layer < hit_threshhold)
 			return FALSE
 		else if(!direct_target) // non dense objects do not get hit unless specifically clicked
@@ -606,10 +630,10 @@
 	return FALSE
 
 /obj/projectile/proc/check_ricochet_flag(atom/A)
-	if((flag in list(ENERGY, LASER)) && (A.flags_ricochet & RICOCHET_SHINY))
+	if((armor_flag in list(ENERGY, LASER)) && (A.flags_ricochet & RICOCHET_SHINY))
 		return TRUE
 
-	if((flag in list(BOMB, BULLET)) && (A.flags_ricochet & RICOCHET_HARD))
+	if((armor_flag in list(BOMB, BULLET)) && (A.flags_ricochet & RICOCHET_HARD))
 		return TRUE
 
 	return FALSE
@@ -629,7 +653,7 @@
 	var/turf/ending = return_predicted_turf_after_moves(moves, forced_angle)
 	return get_line(current, ending)
 
-/obj/projectile/Process_Spacemove(movement_dir = 0)
+/obj/projectile/Process_Spacemove(movement_dir = 0, continuous_move = FALSE)
 	return TRUE //Bullets don't drift in space
 
 /obj/projectile/process()
@@ -664,7 +688,7 @@
 		AddElement(/datum/element/embed, projectile_payload = shrapnel_type)
 	if(!log_override && firer && original)
 		log_combat(firer, original, "fired at", src, "from [get_area_name(src, TRUE)]")
-	if(direct_target && (get_dist(direct_target, get_turf(src)) <= 1)) // point blank shots
+	if(direct_target && (get_dist(direct_target, get_turf(fired_from)) <= 1)) // point blank shots // SKYRAT EDIT - ORIGINAL: if(direct_target && (get_dist(direct_target, get_turf(src)) <= 1))
 		process_hit(get_turf(direct_target), direct_target)
 		if(QDELETED(src))
 			return
@@ -949,12 +973,10 @@
 	var/ty = (text2num(screen_loc_Y[1]) - 1) * world.icon_size + text2num(screen_loc_Y[2])
 
 	//Calculate the "resolution" of screen based on client's view and world's icon size. This will work if the user can view more tiles than average.
-	var/list/screenview = getviewsize(user.client.view)
-	var/screenviewX = screenview[1] * world.icon_size
-	var/screenviewY = screenview[2] * world.icon_size
+	var/list/screenview = view_to_pixels(user.client.view)
 
-	var/ox = round(screenviewX/2) - user.client.pixel_x //"origin" x
-	var/oy = round(screenviewY/2) - user.client.pixel_y //"origin" y
+	var/ox = round(screenview[1] / 2) - user.client.pixel_x //"origin" x
+	var/oy = round(screenview[2] / 2) - user.client.pixel_y //"origin" y
 	angle = ATAN2(tx - oy, ty - ox)
 	return list(angle, p_x, p_y)
 

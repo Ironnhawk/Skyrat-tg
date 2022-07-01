@@ -104,6 +104,9 @@ require only minor tweaks.
 // string - type path of the z-level's baseturf (defaults to space)
 #define ZTRAIT_BASETURF "Baseturf"
 
+///boolean - does this z disable parallax?
+#define ZTRAIT_NOPARALLAX "No Parallax"
+
 // default trait definitions, used by SSmapping
 ///Z level traits for CentCom
 #define ZTRAITS_CENTCOM list(ZTRAIT_CENTCOM = TRUE, ZTRAIT_NOPHASE = TRUE)
@@ -114,6 +117,7 @@ require only minor tweaks.
 ///Z level traits for Lavaland
 #define ZTRAITS_LAVALAND list(\
 	ZTRAIT_MINING = TRUE, \
+	ZTRAIT_NOPARALLAX = TRUE, \
 	ZTRAIT_ASHSTORM = TRUE, \
 	ZTRAIT_LAVA_RUINS = TRUE, \
 	ZTRAIT_BOMBCAP_MULTIPLIER = 2, \
@@ -170,7 +174,7 @@ require only minor tweaks.
 #define BIOME_HIGH_HUMIDITY "high_humidity"
 
 // Bluespace shelter deploy checks for survival capsules
-/// Shelter spot is allowed 
+/// Shelter spot is allowed
 #define SHELTER_DEPLOY_ALLOWED "allowed"
 /// Shelter spot has turfs that restrict deployment
 #define SHELTER_DEPLOY_BAD_TURFS "bad turfs"
@@ -178,5 +182,5 @@ require only minor tweaks.
 #define SHELTER_DEPLOY_BAD_AREA "bad area"
 /// Shelter spot has anchored objects that restrict deployment
 #define SHELTER_DEPLOY_ANCHORED_OBJECTS "anchored objects"
-/// Shelter spot is out of bounds from the maps x/y coordinates 
+/// Shelter spot is out of bounds from the maps x/y coordinates
 #define SHELTER_DEPLOY_OUTSIDE_MAP "outside map"

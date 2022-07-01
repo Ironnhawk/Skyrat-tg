@@ -9,13 +9,13 @@
 	icon = 'modular_skyrat/modules/microfusion/icons/microfusion_gun40x32.dmi'
 	icon_state = "mcr01"
 	bayonet_icon = 'modular_skyrat/modules/microfusion/icons/microfusion_gun40x32.dmi'
-	gunlight_icon = 'modular_skyrat/modules/microfusion/icons/microfusion_gun40x32.dmi'
 	lefthand_file = 'modular_skyrat/modules/microfusion/icons/guns_lefthand.dmi'
 	righthand_file = 'modular_skyrat/modules/microfusion/icons/guns_righthand.dmi'
 	has_gun_safety = TRUE
-	can_flashlight = FALSE
 	can_bayonet = FALSE
 	w_class = WEIGHT_CLASS_BULKY
+	obj_flags = UNIQUE_RENAME
+	ammo_x_offset = 2
 
 	/// What type of power cell this uses
 	var/obj/item/stock_parts/cell/microfusion/cell
@@ -29,7 +29,6 @@
 	var/can_charge = TRUE
 	/// How many charge sections do we have?
 	var/charge_sections = 4
-	ammo_x_offset = 2
 	/// if this gun uses a stateful charge bar for more detail
 	var/shaded_charge = FALSE
 	/// If this gun has a "this is loaded with X" overlay alongside chargebars and such
@@ -44,9 +43,9 @@
 	/// The microfusion lens used for generating the beams.
 	var/obj/item/ammo_casing/energy/laser/microfusion/microfusion_lens
 	/// The time it takes for someone to (tactically) reload this gun. In deciseconds.
-	var/reload_time = 6 SECONDS
+	var/reload_time = 4 SECONDS
 	/// The time it takes for someone to normally reload this gun. In deciseconds.
-	var/reload_time_slow = 4 SECONDS
+	var/reload_time_slow = 2 SECONDS
 	/// The sound played when you insert a cell.
 	var/sound_cell_insert = 'modular_skyrat/modules/microfusion/sound/mag_insert.ogg'
 	/// Should the insertion sound played vary?
@@ -116,6 +115,9 @@
 
 /obj/item/gun/microfusion/add_weapon_description()
 	AddElement(/datum/element/weapon_description, attached_proc = .proc/add_notes_energy)
+
+/obj/item/gun/microfusion/add_seclight_point()
+	return
 
 /obj/item/gun/microfusion/Destroy()
 	if(microfusion_lens)
@@ -620,7 +622,7 @@
 		if(reload_time && !HAS_TRAIT(user, TRAIT_INSTANT_RELOAD)) //This only happens when you're attempting a tactical reload, e.g. there's a mag already inserted.
 			if(display_message)
 				to_chat(user, span_notice("You start to insert [inserting_cell] into [src]!"))
-			if(!do_after(user, reload_time, src))
+			if(!do_after(user, reload_time, src, IGNORE_USER_LOC_CHANGE))
 				if(display_message)
 					to_chat(user, span_warning("You fail to insert [inserting_cell] into [src]!"))
 				return FALSE
@@ -631,7 +633,7 @@
 	else
 		if(display_message)
 			to_chat(user, span_notice("You start to insert [inserting_cell] into [src]!"))
-		if(!do_after(user, reload_time_slow, src))
+		if(!do_after(user, reload_time_slow, src, IGNORE_USER_LOC_CHANGE))
 			if(display_message)
 				to_chat(user, span_warning("You fail to insert [inserting_cell] into [src]!"))
 			return FALSE
@@ -700,18 +702,6 @@
 	attachments -= microfusion_gun_attachment
 	microfusion_gun_attachment.remove_attachment(src)
 	user?.put_in_hands(microfusion_gun_attachment)
-	update_appearance()
-
-/obj/item/gun/microfusion/proc/change_name(mob/user)
-	var/new_name = input(user, "Enter new name:", "Change gun name") as null|text
-	if(!new_name)
-		return
-	var/name_length = length(new_name)
-	if(name_length > GUN_MAX_NAME_CHARS && name_length < GUN_MIN_NAME_CHARS)
-		to_chat(user, span_warning("New name cannot be longer than 20 or shorter than 5 characters!"))
-		return
-
-	name = sanitize(new_name)
 	update_appearance()
 
 // UI CONTROL
@@ -798,8 +788,6 @@
 			if(!cell)
 				return
 			eject_cell(usr)
-		if("change_gun_name")
-			change_name(usr)
 		if("overclock_emitter")
 			if(!phase_emitter)
 				return

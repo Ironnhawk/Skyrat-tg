@@ -7,7 +7,7 @@
 	icon_state = "qipao"
 	body_parts_covered = CHEST|GROIN
 	can_adjust = FALSE
-	mutant_variants = NONE
+	supports_variations_flags = NONE
 
 /obj/item/clothing/under/costume/qipao/white
 	name = "white qipao"
@@ -39,7 +39,7 @@
 	icon_state = "cheong"
 	body_parts_covered = CHEST|GROIN
 	can_adjust = FALSE
-	mutant_variants = NONE
+	supports_variations_flags = NONE
 
 /obj/item/clothing/under/costume/cheongsam/white
 	name = "white cheongsam"
@@ -61,7 +61,7 @@
 	worn_icon = 'modular_skyrat/master_files/icons/mob/clothing/uniform.dmi'
 	icon_state = "cyberpunksleek"
 	body_parts_covered = CHEST|ARMS|GROIN|LEGS
-	mutant_variants = NONE
+	supports_variations_flags = NONE
 	can_adjust = FALSE
 
 /obj/item/clothing/under/costume/cybersleek/long
@@ -98,7 +98,7 @@
 	inhand_icon_state = "bl_suit"
 	has_sensor = HAS_SENSORS
 	armor = list(MELEE = 0, BULLET = 0, LASER = 0,ENERGY = 0, BOMB = 0, BIO = 0, FIRE = 0, ACID = 0)
-	fitted = FEMALE_UNIFORM_TOP
+	female_sprite_flags = FEMALE_UNIFORM_TOP_ONLY
 	dying_key = DYE_REGISTRY_JUMPSKIRT
 
 /obj/item/clothing/under/syndicate/bloodred/sleepytime/sensors

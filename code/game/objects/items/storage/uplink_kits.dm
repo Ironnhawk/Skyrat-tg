@@ -38,7 +38,7 @@
 		)))
 		if(KIT_RECON)
 			new /obj/item/clothing/glasses/thermal/xray(src) // ~8 tc?
-			new /obj/item/storage/briefcase/launchpad(src) //6 tc
+//			new /obj/item/storage/briefcase/launchpad(src) //6 tc // SKYRAT EDIT REMOVAL
 			new /obj/item/binoculars(src) // 2 tc?
 			new /obj/item/encryptionkey/syndicate(src) // 2 tc
 			new /obj/item/storage/box/syndie_kit/space(src) //4 tc
@@ -61,7 +61,7 @@
 			new /obj/item/chameleon(src) // 7 tc
 
 		if(KIT_STEALTHY)
-			new /obj/item/gun/energy/kinetic_accelerator/crossbow(src)
+			new /obj/item/gun/energy/recharge/ebow(src)
 			new /obj/item/pen/sleepy(src)
 			new /obj/item/healthanalyzer/rad_laser(src)
 			new /obj/item/chameleon(src)
@@ -79,6 +79,7 @@
 			new /obj/item/clothing/gloves/color/latex/nitrile(src)
 			new /obj/item/clothing/mask/gas/clown_hat(src)
 			new /obj/item/clothing/under/suit/black_really(src)
+			new /obj/item/clothing/neck/tie/red/hitman(src)
 
 		if(KIT_SCREWED)
 			new /obj/item/sbeacondrop/bomb(src)
@@ -128,7 +129,7 @@
 			/obj/item/storage/backpack/duffelbag/syndie/sabotage
 			new /obj/item/camera_bug(src)
 			new /obj/item/sbeacondrop/powersink(src)
-			new /obj/item/cartridge/virus/syndicate(src)
+			new /obj/item/computer_hardware/hard_drive/portable/virus/deto(src)
 			new /obj/item/storage/toolbox/syndicate(src)
 			new /obj/item/pizzabox/bomb(src)
 			new /obj/item/storage/box/syndie_kit/emp(src)
@@ -140,6 +141,7 @@
 			new /obj/item/clothing/gloves/color/latex/nitrile(src)
 			new /obj/item/clothing/mask/gas/clown_hat(src)
 			new /obj/item/clothing/under/suit/black_really(src)
+			new /obj/item/clothing/neck/tie/red/hitman(src)
 
 		if(KIT_NUKEOPS_METAGAME)
 			new /obj/item/mod/control/pre_equipped/nuclear(src) // 8 tc
@@ -216,7 +218,7 @@
 		if(KIT_BEES)
 			new /obj/item/paper/fluff/bee_objectives(src) // 0 tc (motivation)
 			new /obj/item/clothing/suit/hooded/bee_costume(src) // 0 tc
-			new /obj/item/clothing/mask/animal/rat/bee(src) // 0 tc
+			new /obj/item/clothing/mask/animal/small/bee(src) // 0 tc
 			new /obj/item/storage/belt/fannypack/yellow(src) // 0 tc
 			new /obj/item/grenade/spawnergrenade/buzzkill(src)
 			new /obj/item/grenade/spawnergrenade/buzzkill(src)
@@ -252,22 +254,22 @@
 	new /obj/item/implanter/freedom(src)
 	new /obj/item/stack/telecrystal(src) //The failsafe/self destruct isn't an item we can physically include in the kit, but 1 TC is technically enough to buy the equivalent.
 
-/obj/item/storage/box/syndicate/contract_kit
+/obj/item/storage/box/syndicate/contract_kit //SKYRAT EDIT - CHANGED IN MODULAR FOLDER
 	name = "Contract Kit"
 	desc = "Supplied to Syndicate contractors."
 	icon_state = "syndiebox"
 	illustration = "writing_syndie"
 
-/obj/item/storage/box/syndicate/contractor_loadout
+/obj/item/storage/box/syndicate/contractor_loadout //SKYRAT EDIT - CHANGED IN MODULAR FOLDER
 	name = "Standard Loadout"
 	desc = "Supplied to Syndicate contractors, providing their specialised space suit and chameleon uniform."
 	icon_state = "syndiebox"
 	illustration = "writing_syndie"
 
-/obj/item/paper/contractor_guide
+/obj/item/paper/contractor_guide //SKYRAT EDIT - CHANGED IN MODULAR FOLDER
 	name = "Contractor Guide"
 
-/obj/item/paper/contractor_guide/Initialize(mapload)
+/obj/item/paper/contractor_guide/Initialize(mapload) //SKYRAT EDIT - CHANGED IN MODULAR FOLDER
 	info = {"<p>Welcome agent, congratulations on your new position as contractor. On top of your already assigned objectives,
 			this kit will provide you contracts to take on for TC payments.</p>
 
@@ -475,7 +477,8 @@
 	new /obj/item/storage/belt/chameleon(src)
 	new /obj/item/radio/headset/chameleon(src)
 	new /obj/item/stamp/chameleon(src)
-	new /obj/item/pda/chameleon(src)
+	new /obj/item/modular_computer/tablet/pda/chameleon(src)
+	new /obj/item/gun/energy/laser/chameleon(src)
 
 //5*(2*4) = 5*8 = 45, 45 damage if you hit one person with all 5 stars.
 //Not counting the damage it will do while embedded (2*4 = 8, at 15% chance)
@@ -515,7 +518,7 @@
 	new /obj/item/radio/headset/headset_cent/empty(src)
 	new /obj/item/clothing/glasses/sunglasses(src)
 	new /obj/item/storage/backpack/satchel(src)
-	new /obj/item/pda/heads(src)
+	new /obj/item/modular_computer/tablet/pda/heads(src)
 	new /obj/item/clipboard(src)
 
 /obj/item/storage/box/syndie_kit/chameleon/broken/PopulateContents()
@@ -531,7 +534,7 @@
 	new /obj/item/storage/belt/chameleon/broken(src)
 	new /obj/item/radio/headset/chameleon/broken(src)
 	new /obj/item/stamp/chameleon/broken(src)
-	new /obj/item/pda/chameleon/broken(src)
+	new /obj/item/modular_computer/tablet/pda/chameleon/broken(src)
 	// No chameleon laser, they can't randomise for //REASONS//
 
 /obj/item/storage/box/syndie_kit/bee_grenades

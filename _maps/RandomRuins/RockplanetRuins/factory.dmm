@@ -114,9 +114,7 @@
 /turf/open/floor/iron/dark/smooth_large/lowpressure,
 /area/ruin/unpowered)
 "gO" = (
-/obj/structure/sign/warning/enginesafety{
-	pixel_x = 32
-	},
+/obj/structure/sign/warning/engine_safety/directional/east,
 /obj/effect/decal/cleanable/robot_debris/up,
 /turf/open/floor/iron/sepia/lowpressure,
 /area/ruin/unpowered)
@@ -191,9 +189,7 @@
 /turf/open/floor/iron/large/lowpressure,
 /area/ruin/unpowered)
 "lW" = (
-/obj/structure/sign/warning/nosmoking/circle{
-	pixel_x = -32
-	},
+/obj/structure/sign/warning/no_smoking/circle/directional/west,
 /obj/structure/light_construct/directional/west,
 /turf/open/floor/iron/smooth_large/lowpressure,
 /area/ruin/unpowered)
@@ -261,7 +257,7 @@
 /obj/structure/railing{
 	dir = 4
 	},
-/turf/open/floor/iron/stairs/old,
+/turf/open/floor/iron/stairs/lowpressure,
 /area/ruin/unpowered)
 "sj" = (
 /obj/machinery/light/built/directional/south,
@@ -322,7 +318,7 @@
 /turf/open/floor/iron/sepia/lowpressure,
 /area/ruin/unpowered)
 "xu" = (
-/turf/open/floor/plating/asteroid/lowpressure,
+/turf/open/misc/asteroid/lowpressure,
 /area/ruin/unpowered)
 "xW" = (
 /obj/structure/table_frame,
@@ -432,8 +428,8 @@
 /turf/open/floor/iron/smooth_large/lowpressure,
 /area/ruin/unpowered)
 "Fg" = (
-/obj/structure/flora/ausbushes/stalkybush,
-/turf/open/floor/plating/asteroid/lowpressure,
+/obj/structure/flora/bush/stalky,
+/turf/open/misc/asteroid/lowpressure,
 /area/ruin/unpowered)
 "FW" = (
 /obj/structure/fluff{
@@ -456,8 +452,8 @@
 /turf/open/floor/plating/lowpressure,
 /area/ruin/unpowered)
 "GJ" = (
-/obj/structure/flora/ausbushes/palebush,
-/turf/open/floor/plating/asteroid/lowpressure,
+/obj/structure/flora/bush/pale,
+/turf/open/misc/asteroid/lowpressure,
 /area/ruin/unpowered)
 "GL" = (
 /obj/effect/turf_decal/sand/plating,
@@ -486,7 +482,7 @@
 /turf/open/floor/iron/sepia/lowpressure,
 /area/ruin/unpowered)
 "HK" = (
-/obj/machinery/door/keycard/blue_required,
+/obj/machinery/door/puzzle/keycard/blue_required,
 /turf/open/floor/iron/grimy/lowpressure,
 /area/ruin/unpowered)
 "HQ" = (
@@ -534,9 +530,7 @@
 /turf/open/floor/iron/sepia/lowpressure,
 /area/ruin/unpowered)
 "LN" = (
-/obj/structure/sign/warning/securearea{
-	pixel_y = 32
-	},
+/obj/structure/sign/warning/secure_area/directional/north,
 /obj/effect/turf_decal/sand/plating,
 /turf/open/floor/plating/rust/lowpressure,
 /area/ruin/unpowered)
@@ -598,7 +592,7 @@
 /obj/structure/railing{
 	dir = 8
 	},
-/turf/open/floor/iron/stairs/old,
+/turf/open/floor/iron/stairs/lowpressure,
 /area/ruin/unpowered)
 "Qk" = (
 /obj/effect/decal/cleanable/cobweb,

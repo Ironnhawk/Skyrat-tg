@@ -62,16 +62,17 @@
 /obj/item/storage/bag/garment/hop/PopulateContents()
 	new /obj/item/clothing/under/rank/civilian/head_of_personnel(src)
 	new /obj/item/clothing/under/rank/civilian/head_of_personnel/skirt(src)
-	new /obj/item/clothing/suit/armor/vest/alt(src)
+	new /obj/item/clothing/suit/armor/vest/hop(src)
 	new /obj/item/clothing/glasses/sunglasses(src)
 	new /obj/item/clothing/head/hopcap(src)
 	new /obj/item/clothing/neck/cloak/hop(src)
-	new /obj/item/clothing/shoes/sneakers/brown(src)
+	new /obj/item/clothing/shoes/laceup(src)
 	new /obj/item/clothing/suit/hooded/wintercoat/hop(src)
+	new /obj/item/clothing/suit/hooded/wintercoat/hopformal(src)
 
 /obj/item/storage/bag/garment/hos/PopulateContents()
-	new /obj/item/clothing/under/rank/security/head_of_security/grey(src)
-	new /obj/item/clothing/under/rank/security/head_of_security/skirt(src)
+	//new /obj/item/clothing/under/rank/security/head_of_security/grey(src) //SKYRAT EDIT REMOVAL
+	//new /obj/item/clothing/under/rank/security/head_of_security/skirt(src) //SKYRAT EDIT REMOVAL
 	new /obj/item/clothing/under/rank/security/head_of_security/alt(src)
 	new /obj/item/clothing/under/rank/security/head_of_security/alt/skirt(src)
 	new /obj/item/clothing/under/rank/security/head_of_security/parade/female(src)

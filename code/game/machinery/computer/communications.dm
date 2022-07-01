@@ -20,7 +20,7 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 	desc = "A console used for high-priority announcements and emergencies."
 	icon_screen = "comm"
 	icon_keyboard = "tech_key"
-	req_access = list(ACCESS_HEADS)
+	req_access = list(ACCESS_COMMAND)
 	circuit = /obj/item/circuitboard/computer/communications
 	light_color = LIGHT_COLOR_BLUE
 
@@ -211,14 +211,13 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 					playsound(src, 'sound/machines/terminal_prompt_deny.ogg', 50, FALSE)
 					return
 
-			var/new_sec_level = seclevel2num(params["newSecurityLevel"])
-			//if (new_sec_level != SEC_LEVEL_GREEN && new_sec_level != SEC_LEVEL_BLUE) - ORIGINAL
+			var/new_sec_level = SSsecurity_level.text_level_to_number(params["newSecurityLevel"])
 			if (new_sec_level < SEC_LEVEL_GREEN || new_sec_level > SEC_LEVEL_AMBER) //SKYRAT EDIT CHANGE - ALERTS
 				return
-			if (SSsecurity_level.current_level == new_sec_level)
+			if (SSsecurity_level.get_current_level_as_number() == new_sec_level)
 				return
 
-			set_security_level(new_sec_level)
+			SSsecurity_level.set_level(new_sec_level)
 
 			to_chat(usr, span_notice("Authorization confirmed. Modifying security level."))
 			playsound(src, 'sound/machines/terminal_prompt_confirm.ogg', 50, FALSE)
@@ -360,7 +359,7 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 			if (state == STATE_BUYING_SHUTTLE && can_buy_shuttles(usr) != TRUE)
 				return
 			set_state(usr, params["state"])
-			playsound(src, "terminal_type", 50, FALSE)
+			playsound(src, SFX_TERMINAL_TYPE, 50, FALSE)
 		if ("setStatusMessage")
 			if (!authenticated(usr))
 				return
@@ -369,7 +368,7 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 			post_status("alert", "blank")
 			post_status("message", line_one, line_two)
 			last_status_display = list(line_one, line_two)
-			playsound(src, "terminal_type", 50, FALSE)
+			playsound(src, SFX_TERMINAL_TYPE, 50, FALSE)
 		if ("setStatusPicture")
 			if (!authenticated(usr))
 				return
@@ -380,7 +379,7 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 				post_status(picture)
 			else
 				post_status("alert", picture)
-			playsound(src, "terminal_type", 50, FALSE)
+			playsound(src, SFX_TERMINAL_TYPE, 50, FALSE)
 		if ("toggleAuthentication")
 			// Log out if we're logged in
 			if (authorize_name)
@@ -553,8 +552,8 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 				data["importantActionReady"] = COOLDOWN_FINISHED(src, important_action_cooldown)
 				data["shuttleCalled"] = FALSE
 				data["shuttleLastCalled"] = FALSE
-
-				data["alertLevel"] = get_security_level()
+				data["aprilFools"] = SSevents.holidays && SSevents.holidays[APRIL_FOOLS]
+				data["alertLevel"] = SSsecurity_level.get_current_level_as_text()
 				data["authorizeName"] = authorize_name
 				data["canLogOut"] = !issilicon(user)
 				data["shuttleCanEvacOrFailReason"] = SSshuttle.canEvac(user)
@@ -642,6 +641,7 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 	return data
 
 /obj/machinery/computer/communications/ui_interact(mob/user, datum/tgui/ui)
+	. = ..()
 	ui = SStgui.try_update_ui(user, src, ui)
 	if (!ui)
 		ui = new(user, src, "CommunicationsConsole")
@@ -735,7 +735,7 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 		return
 
 	return length(CONFIG_GET(keyed_list/cross_server)) > 0
-/*
+
 /**
  * Call an emergency meeting
  *
@@ -752,7 +752,7 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 		return
 	SScommunications.emergency_meeting(user)
 	deadchat_broadcast(" called an emergency meeting from [span_name("[get_area_name(usr, TRUE)]")].", span_name("[user.real_name]"), user, message_type=DEADCHAT_ANNOUNCEMENT)
-*/
+
 
 /obj/machinery/computer/communications/proc/make_announcement(mob/living/user)
 	var/is_ai = issilicon(user)
@@ -816,10 +816,27 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 #define MIN_GHOSTS_FOR_FUGITIVES 6
 /// The maximum percentage of the population to be ghosts before we no longer have the chance of spawning Sleeper Agents.
 #define MAX_PERCENT_GHOSTS_FOR_SLEEPER 0.2
-/// The amount of threat injected by a hack, if chosen.
-#define HACK_THREAT_INJECTION_AMOUNT 15
 
-/*
+/// Begin the process of hacking into the comms console to call in a threat.
+/obj/machinery/computer/communications/proc/try_hack_console(mob/living/hacker, duration = 30 SECONDS)
+	if(!can_hack())
+		return FALSE
+
+	AI_notify_hack()
+	if(!do_after(hacker, duration, src, extra_checks = CALLBACK(src, .proc/can_hack)))
+		return FALSE
+
+	hack_console(hacker)
+	return TRUE
+
+/// Checks if this console is hackable. Used as a callback during try_hack_console's doafter as well.
+/obj/machinery/computer/communications/proc/can_hack()
+	if(machine_stat & (NOPOWER|BROKEN))
+		return FALSE
+
+	return TRUE
+
+/**
  * The communications console hack,
  * called by certain antagonist actions.
  *
@@ -851,8 +868,8 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 		if(HACK_PIRATE) // Triggers pirates, which the crew may be able to pay off to prevent
 			priority_announce(
 				"Attention crew, it appears that someone on your station has made unexpected communication with a Syndicate ship in nearby space.",
-				"[command_name()] High-Priority Update"
-				)
+				"[command_name()] High-Priority Update",
+			)
 
 			var/datum/round_event_control/pirates/pirate_event = locate() in SSevents.control
 			if(!pirate_event)
@@ -861,20 +878,20 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 
 		if(HACK_FUGITIVES) // Triggers fugitives, which can cause confusion / chaos as the crew decides which side help
 			priority_announce(
-				"Attention crew, it appears that someone on your station has established an unexpected orbit with an unmarked ship in nearby space.",
-				"[command_name()] High-Priority Update"
-				)
+				"Attention crew, it appears that someone on your station has made unexpected communication with an unmarked ship in nearby space.",
+				"[command_name()] High-Priority Update",
+			)
 
 			var/datum/round_event_control/fugitives/fugitive_event = locate() in SSevents.control
 			if(!fugitive_event)
 				CRASH("hack_console() attempted to run fugitives, but could not find an event controller!")
 			addtimer(CALLBACK(fugitive_event, /datum/round_event_control.proc/runEvent), rand(20 SECONDS, 1 MINUTES))
 
-		if(HACK_THREAT) // Adds a flat amount of threat to buy a (probably) more dangerous antag later
+		if(HACK_THREAT) // Force an unfavorable situation on the crew
 			priority_announce(
-				"Attention crew, it appears that someone on your station has shifted your orbit into more dangerous territory.",
-				"[command_name()] High-Priority Update"
-				)
+				SSmapping.config.orbit_shift_replacement,
+				"[command_name()] High-Priority Update",
+			)
 
 			for(var/mob/crew_member as anything in GLOB.player_list)
 				if(!is_station_level(crew_member.z))
@@ -882,8 +899,7 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 				shake_camera(crew_member, 15, 1)
 
 			var/datum/game_mode/dynamic/dynamic = SSticker.mode
-			dynamic.create_threat(HACK_THREAT_INJECTION_AMOUNT)
-			dynamic.threat_log += "[worldtime2text()]: Communications console hack by [hacker]. Added [HACK_THREAT_INJECTION_AMOUNT] threat."
+			dynamic.unfavorable_situation()
 
 		if(HACK_SLEEPER) // Trigger one or multiple sleeper agents with the crew (or for latejoining crew)
 			var/datum/dynamic_ruleset/midround/sleeper_agent_type = /datum/dynamic_ruleset/midround/autotraitor
@@ -891,23 +907,20 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 			var/max_number_of_sleepers = clamp(round(length(GLOB.alive_player_list) / 20), 1, 3)
 			var/num_agents_created = 0
 			for(var/num_agents in 1 to rand(1, max_number_of_sleepers))
-				// Offset the trheat cost of the sleeper agent(s) we're about to run...
-				dynamic.create_threat(initial(sleeper_agent_type.cost))
-				// ...Then try to actually trigger a sleeper agent.
-				if(!dynamic.picking_specific_rule(sleeper_agent_type, TRUE))
+				if(!dynamic.picking_specific_rule(sleeper_agent_type, forced = TRUE, ignore_cost = TRUE))
 					break
 				num_agents_created++
 
 			if(num_agents_created <= 0)
 				// We failed to run any midround sleeper agents, so let's be patient and run latejoin traitor
-				dynamic.picking_specific_rule(/datum/dynamic_ruleset/latejoin/infiltrator, TRUE)
+				dynamic.picking_specific_rule(/datum/dynamic_ruleset/latejoin/infiltrator, forced = TRUE, ignore_cost = TRUE)
 
 			else
 				// We spawned some sleeper agents, nice - give them a report to kickstart the paranoia
 				priority_announce(
 					"Attention crew, it appears that someone on your station has hijacked your telecommunications, broadcasting a Syndicate radio signal to your fellow employees.",
-					"[command_name()] High-Priority Update"
-					)
+					"[command_name()] High-Priority Update",
+				)
 
 #undef HACK_PIRATE
 #undef HACK_FUGITIVES
@@ -917,7 +930,6 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 #undef MIN_GHOSTS_FOR_PIRATES
 #undef MIN_GHOSTS_FOR_FUGITIVES
 #undef MAX_PERCENT_GHOSTS_FOR_SLEEPER
-#undef HACK_THREAT_INJECTION_AMOUNT
 
 /datum/comm_message
 	var/title
@@ -937,7 +949,6 @@ GLOBAL_VAR_INIT(cops_arrived, FALSE)
 
 #undef IMPORTANT_ACTION_COOLDOWN
 #undef EMERGENCY_ACCESS_COOLDOWN
-#undef MAX_STATUS_LINE_LENGTH
 #undef STATE_BUYING_SHUTTLE
 #undef STATE_CHANGING_STATUS
 #undef STATE_MAIN

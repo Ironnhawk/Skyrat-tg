@@ -4,6 +4,7 @@
 
 /datum/map_template/shuttle/emergency/outpost
 	suffix = "outpost"
+	prefix = "_maps/shuttles/skyrat/"
 	name = "Outpoststation Emergency Shuttle"
 	description = "The perfect shuttle for rectangle enthuasiasts, this long and slender shuttle has been known for it's incredible(Citation Needed) safety rating."
 	admin_notes = "Has airlocks on both sides of the shuttle and will probably ram deltastation's maint wing below medical. Oh well?"
@@ -18,7 +19,6 @@
 /obj/machinery/computer/shuttle/caravan/blackmarket_chevvy
 	name = "Chevvy Shuttle Console"
 	desc = "Used to control the affectionately named 'Chevvy'."
-	req_access = list(208)
 	circuit = /obj/item/circuitboard/computer/blackmarket_chevvy
 	shuttleId = "blackmarket_chevvy"
 	possible_destinations = "blackmarket_chevvy_custom;blackmarket_chevvy_home;whiteship_home"
@@ -104,6 +104,9 @@
 /obj/item/radio/headset/guild/command
 	command = TRUE
 
+/datum/outfit/guild
+	name = "Guild Default Outfit"
+
 /datum/outfit/guild/slaver
 	name = "Privateer Slaver"
 	head = /obj/item/clothing/head/helmet/alt
@@ -117,7 +120,7 @@
 	implants = list(/obj/item/implant/weapons_auth)
 	belt = /obj/item/storage/belt/military
 	r_pocket = /obj/item/storage/bag/ammo
-	l_pocket = /obj/item/gun/energy/disabler/cfa_disabler
+	l_pocket = /obj/item/gun/energy/disabler/bolt_disabler
 	id = /obj/item/card/id/advanced/chameleon
 	id_trim = /datum/id_trim/chameleon/operative
 	skillchips = list(/obj/item/skillchip/job/engineer)
@@ -147,7 +150,7 @@
 	implants = list(/obj/item/implant/weapons_auth)
 	belt = /obj/item/storage/belt/military
 	r_pocket = /obj/item/storage/bag/ammo
-	l_pocket = /obj/item/gun/energy/disabler/cfa_disabler
+	l_pocket = /obj/item/gun/energy/disabler/bolt_disabler
 	id = /obj/item/card/id/advanced/chameleon
 	id_trim = /datum/id_trim/chameleon/operative
 	skillchips = list(/obj/item/skillchip/job/engineer)
@@ -185,6 +188,6 @@
 	view_range = 0
 
 /obj/item/circuitboard/computer/tarkon_driver
-	name = "Chevvy Control Console (Computer Board)"
+	name = "Tarkon Driver Control Console (Computer Board)"
 	build_path = /obj/machinery/computer/shuttle/tarkon_driver
 /*----- End of Tarkon Shuttle Code -----*/

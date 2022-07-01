@@ -18,7 +18,7 @@
 	body += "<body>Options panel for <b>[M]</b>"
 	if(M.client)
 		body += " played by <b>[M.client]</b> "
-		body += "\[<A href='?_src_=holder;[HrefToken()];editrights=[(GLOB.admin_datums[M.client.ckey] || GLOB.deadmins[M.client.ckey]) ? "rank" : "add"];key=[M.key]'>[M.client.holder ? M.client.holder.rank : "Player"]</A>\]"
+		body += "\[<A href='?_src_=holder;[HrefToken()];editrights=[(GLOB.admin_datums[M.client.ckey] || GLOB.deadmins[M.client.ckey]) ? "rank" : "add"];key=[M.key]'>[M.client.holder ? M.client.holder.rank_names() : "Player"]</A>\]"
 		if(CONFIG_GET(flag/use_exp_tracking))
 			body += "\[<A href='?_src_=holder;[HrefToken()];getplaytimewindow=[REF(M)]'>" + M.client.get_exp_living(FALSE) + "</a>\]"
 
@@ -385,14 +385,12 @@ Traitors and the like can also be revived with the previous role mostly intact.
 
 	for (var/hudtype in list(DATA_HUD_SECURITY_ADVANCED, DATA_HUD_MEDICAL_ADVANCED, DATA_HUD_DIAGNOSTIC_ADVANCED))
 		var/datum/atom_hud/atom_hud = GLOB.huds[hudtype]
-		atom_hud.add_hud_to(mob)
+		atom_hud.show_to(mob)
 
 	for (var/datum/atom_hud/alternate_appearance/basic/antagonist_hud/antag_hud in GLOB.active_alternate_appearances)
-		antag_hud.add_hud_to(mob)
+		antag_hud.show_to(mob)
 
-	if (prefs.toggles & COMBOHUD_LIGHTING)
-		mob.lighting_alpha = LIGHTING_PLANE_ALPHA_INVISIBLE
-
+	mob.lighting_alpha = mob.default_lighting_alpha()
 	mob.update_sight()
 
 /client/proc/disable_combo_hud()
@@ -403,14 +401,12 @@ Traitors and the like can also be revived with the previous role mostly intact.
 
 	for (var/hudtype in list(DATA_HUD_SECURITY_ADVANCED, DATA_HUD_MEDICAL_ADVANCED, DATA_HUD_DIAGNOSTIC_ADVANCED))
 		var/datum/atom_hud/atom_hud = GLOB.huds[hudtype]
-		atom_hud.remove_hud_from(mob)
+		atom_hud.hide_from(mob)
 
 	for (var/datum/atom_hud/alternate_appearance/basic/antagonist_hud/antag_hud in GLOB.active_alternate_appearances)
-		antag_hud.remove_hud_from(mob)
+		antag_hud.hide_from(mob)
 
-	if (prefs.toggles & COMBOHUD_LIGHTING)
-		mob.lighting_alpha = initial(mob.lighting_alpha)
-
+	mob.lighting_alpha = mob.default_lighting_alpha()
 	mob.update_sight()
 
 /datum/admins/proc/show_traitor_panel(mob/target_mob in GLOB.mob_list)
@@ -470,5 +466,6 @@ Traitors and the like can also be revived with the previous role mostly intact.
 	dat += "Disable examine icons: <a href='?_src_=holder;[HrefToken()];change_lag_switch=[DISABLE_USR_ICON2HTML]'><b>[SSlag_switch.measures[DISABLE_USR_ICON2HTML] ? "On" : "Off"]</b></a> - <span style='font-size:80%'>trait applies to examiner</span><br/>"
 	dat += "Disable parallax: <a href='?_src_=holder;[HrefToken()];change_lag_switch=[DISABLE_PARALLAX]'><b>[SSlag_switch.measures[DISABLE_PARALLAX] ? "On" : "Off"]</b></a> - <span style='font-size:80%'>trait applies to character</span><br />"
 	dat += "Disable footsteps: <a href='?_src_=holder;[HrefToken()];change_lag_switch=[DISABLE_FOOTSTEPS]'><b>[SSlag_switch.measures[DISABLE_FOOTSTEPS] ? "On" : "Off"]</b></a> - <span style='font-size:80%'>trait applies to character</span><br />"
+	dat += "Disable character creator: <a href='?_src_=holder;[HrefToken()];change_lag_switch=[DISABLE_CREATOR]'><b>[SSlag_switch.measures[DISABLE_CREATOR] ? "On" : "Off"]</b></a> - <span style='font-size:80%'>trait applies to all</span><br />" // SKRYAT EDIT ADDITION
 	dat += "</body></html>"
 	usr << browse(dat.Join(), "window=lag_switch_panel;size=420x480")

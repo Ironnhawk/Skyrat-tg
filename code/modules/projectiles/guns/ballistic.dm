@@ -136,6 +136,20 @@
 /obj/item/gun/ballistic/add_weapon_description()
 	AddElement(/datum/element/weapon_description, attached_proc = .proc/add_notes_ballistic)
 
+/obj/item/gun/ballistic/fire_sounds()
+	var/frequency_to_use = sin((90/magazine?.max_ammo) * get_ammo())
+	var/click_frequency_to_use = 1 - frequency_to_use * 0.75
+	var/play_click = round(sqrt(magazine?.max_ammo * 2)) > get_ammo()
+	if(suppressed)
+		playsound(src, suppressed_sound, suppressed_volume, vary_fire_sound, ignore_walls = FALSE, extrarange = SILENCED_SOUND_EXTRARANGE, falloff_distance = 0)
+		if(play_click)
+			playsound(src, 'sound/weapons/gun/general/ballistic_click.ogg', suppressed_volume, vary_fire_sound, ignore_walls = FALSE, extrarange = SILENCED_SOUND_EXTRARANGE, falloff_distance = 0, frequency = click_frequency_to_use)
+	else
+		playsound(src, fire_sound, fire_sound_volume, vary_fire_sound)
+		if(play_click)
+			playsound(src, 'sound/weapons/gun/general/ballistic_click.ogg', fire_sound_volume, vary_fire_sound, frequency = click_frequency_to_use)
+
+
 /**
  *
  * Outputs type-specific weapon stats for ballistic weaponry based on its magazine and its caliber.
@@ -317,6 +331,7 @@
 /obj/item/gun/ballistic/can_shoot()
 	return chambered
 
+/* SKYRAT EDIT REMOVAL MOVED TO MODULAR BALLISTIC_MASTER.DM
 /obj/item/gun/ballistic/attackby(obj/item/A, mob/user, params)
 	. = ..()
 	if (.)
@@ -369,7 +384,7 @@
 			return
 
 	return FALSE
-
+*/ // SKYRAT EDIT END
 /obj/item/gun/ballistic/process_fire(atom/target, mob/living/user, message = TRUE, params = null, zone_override = "", bonus_spread = 0)
 
 	if(magazine && chambered.loaded_projectile && can_misfire && misfire_probability > 0)
@@ -530,7 +545,7 @@
 #define BRAINS_BLOWN_THROW_RANGE 3
 #define BRAINS_BLOWN_THROW_SPEED 1
 /obj/item/gun/ballistic/suicide_act(mob/user)
-	var/obj/item/organ/brain/B = user.getorganslot(ORGAN_SLOT_BRAIN)
+	var/obj/item/organ/internal/brain/B = user.getorganslot(ORGAN_SLOT_BRAIN)
 	if (B && chambered && chambered.loaded_projectile && can_trigger_gun(user) && !chambered.loaded_projectile.nodamage)
 		user.visible_message(span_suicide("[user] is putting the barrel of [src] in [user.p_their()] mouth. It looks like [user.p_theyre()] trying to commit suicide!"))
 		sleep(25)
@@ -675,7 +690,7 @@ GLOBAL_LIST_INIT(gun_saw_types, typecacheof(list(
 
 /obj/item/suppressor
 	name = "suppressor"
-	desc = "A syndicate small-arms suppressor for maximum espionage."
+	desc = "A Scarborough Arms small-arms suppressor for maximum espionage." //SKYRAT EDIT
 	icon = 'icons/obj/guns/ballistic.dmi'
 	icon_state = "suppressor"
 	w_class = WEIGHT_CLASS_TINY

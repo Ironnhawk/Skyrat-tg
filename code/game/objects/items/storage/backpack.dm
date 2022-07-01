@@ -71,7 +71,7 @@
 	user.dropItemToGround(src, TRUE)
 	user.Stun(100, ignore_canstun = TRUE)
 	sleep(20)
-	playsound(src, "rustle", 50, TRUE, -5)
+	playsound(src, SFX_RUSTLE, 50, TRUE, -5)
 	qdel(user)
 
 /obj/item/storage/backpack/santabag
@@ -313,7 +313,7 @@
 
 /obj/item/storage/backpack/satchel/flat/Initialize(mapload)
 	. = ..()
-	AddElement(/datum/element/undertile, TRAIT_T_RAY_VISIBLE, INVISIBILITY_OBSERVER, use_anchor = TRUE)
+	AddElement(/datum/element/undertile, TRAIT_T_RAY_VISIBLE, INVISIBILITY_MAXIMUM, use_anchor = TRUE) // SKYRAT EDIT - ORIGINAL: INVISIBILITY_OBSERVER
 
 /obj/item/storage/backpack/satchel/flat/ComponentInitialize()
 	. = ..()
@@ -331,7 +331,31 @@
 
 	qdel(C)
 	*/
-	var/contraband_list = list(/obj/item/storage/bag/ammo=4, /obj/item/storage/belt/utility/syndicate=1, /obj/item/storage/toolbox/syndicate=7, /obj/item/card/id/advanced/chameleon=6, /obj/item/storage/secure/briefcase/syndie=3, /obj/item/stack/telecrystal=2, /obj/item/storage/belt/military=12, /obj/item/storage/pill_bottle/aranesp=11, /obj/item/storage/pill_bottle/happy=12, /obj/item/storage/pill_bottle/stimulant=9, /obj/item/storage/pill_bottle/lsd=10, /obj/item/storage/fancy/cigarettes/cigpack_syndicate=8, /obj/item/storage/fancy/cigarettes/cigpack_shadyjims=10, /obj/item/reagent_containers/food/drinks/bottle/absinthe=12, /obj/item/storage/box/fireworks/dangerous=11, /obj/item/food/grown/cannabis/white=9, /obj/item/food/grown/cannabis=13, /obj/item/food/grown/cannabis/rainbow=8, /obj/item/food/grown/mushroom/libertycap=11, /obj/item/clothing/mask/gas/syndicate=10, /obj/item/vending_refill/donksoft=13, /obj/item/ammo_box/foambox/riot=11, /obj/item/soap/syndie=7)
+	var/contraband_list = list(
+		/obj/item/storage/bag/ammo = 4,
+		/obj/item/storage/belt/utility/syndicate = 1,
+		/obj/item/storage/toolbox/syndicate = 7,
+		/obj/item/card/id/advanced/chameleon = 6,
+		/obj/item/stack/spacecash/c5000 = 3,
+		/obj/item/stack/telecrystal = 2,
+		/obj/item/storage/belt/military = 12,
+		/obj/item/storage/pill_bottle/aranesp = 11,
+		/obj/item/storage/pill_bottle/happy = 12,
+		/obj/item/storage/pill_bottle/stimulant = 9,
+		/obj/item/storage/pill_bottle/lsd = 10,
+		/obj/item/storage/fancy/cigarettes/cigpack_syndicate = 8,
+		/obj/item/storage/fancy/cigarettes/cigpack_shadyjims = 10,
+		/obj/item/reagent_containers/food/drinks/bottle/absinthe = 12,
+		/obj/item/storage/box/fireworks/dangerous = 11,
+		/obj/item/food/grown/cannabis/white = 9,
+		/obj/item/food/grown/cannabis = 13,
+		/obj/item/food/grown/cannabis/rainbow = 8,
+		/obj/item/food/grown/mushroom/libertycap = 11,
+		/obj/item/clothing/mask/gas/syndicate = 10,
+		/obj/item/vending_refill/donksoft = 13,
+		/obj/item/ammo_box/foambox/riot = 11,
+		/obj/item/soap/syndie = 7,
+	)
 	for(var/i in 1 to 3)
 		var/contraband_type = pick_weight(contraband_list)
 		contraband_list -= contraband_type
@@ -363,19 +387,18 @@
 
 /obj/item/storage/backpack/duffelbag/cursed
 	name = "living duffel bag"
-	desc = "A cursed clown duffel bag that hungers for food of any kind.\n A warning label suggests that it eats food inside. If that food happens to be a horribly ruined, burned mess the chef scrapped out of the microwave, then it might have negative effects on the bag..."
+	desc = "A cursed clown duffel bag that hungers for food of any kind. A warning label suggests that it eats food inside. \
+		If that food happens to be a horribly ruined mess or the chef scrapped out of the microwave, or poisoned in some way, \
+		then it might have negative effects on the bag..."
 	icon_state = "duffel-curse"
 	inhand_icon_state = "duffel-curse"
 	slowdown = 2
 	item_flags = DROPDEL
 	max_integrity = 100
-	///counts time passed since it ate food
-	var/hunger = 0
 
 /obj/item/storage/backpack/duffelbag/cursed/Initialize(mapload)
 	. = ..()
-	var/add_dropdel = TRUE //clarified boolean
-	AddComponent(/datum/component/curse_of_hunger, add_dropdel)
+	AddComponent(/datum/component/curse_of_hunger, add_dropdel = TRUE)
 
 /obj/item/storage/backpack/duffelbag/captain
 	name = "captain's duffel bag"
@@ -526,6 +549,7 @@
 
 /obj/item/storage/backpack/duffelbag/syndie/hitman/PopulateContents()
 	new /obj/item/clothing/under/suit/black(src)
+	new /obj/item/clothing/neck/tie/red/hitman(src)
 	new /obj/item/clothing/accessory/waistcoat(src)
 	new /obj/item/clothing/suit/toggle/lawyer/black(src)
 	new /obj/item/clothing/shoes/laceup(src)
@@ -630,7 +654,7 @@
 
 /obj/item/storage/backpack/duffelbag/syndie/med/medicalbundle/PopulateContents()
 	new /obj/item/clothing/shoes/magboots/syndie(src)
-	new /obj/item/storage/firstaid/tactical(src)
+	new /obj/item/storage/medkit/tactical(src)
 	new /obj/item/gun/ballistic/automatic/l6_saw/toy(src)
 	new /obj/item/ammo_box/foambox/riot(src)
 
@@ -677,7 +701,7 @@
 	STR.silent = TRUE
 
 /obj/item/storage/backpack/duffelbag/clown/syndie/PopulateContents()
-	new /obj/item/pda/clown(src)
+	new /obj/item/modular_computer/tablet/pda/clown(src)
 	new /obj/item/clothing/under/rank/civilian/clown(src)
 	new /obj/item/clothing/shoes/clown_shoes(src)
 	new /obj/item/clothing/mask/gas/clown_hat(src)
@@ -694,4 +718,3 @@
 	name = "police bag"
 	desc = "A large duffel bag for holding extra police gear."
 	slowdown = 0
-

@@ -23,7 +23,7 @@
 	outfit = /datum/outfit/job/nanotrasen_consultant
 	plasmaman_outfit = /datum/outfit/plasmaman/nanotrasen_consultant
 
-	paycheck = PAYCHECK_HARD
+	paycheck = PAYCHECK_COMMAND
 	paycheck_department = ACCOUNT_CMD
 
 	display_order = JOB_DISPLAY_ORDER_NANOTRASEN_CONSULTANT
@@ -40,17 +40,11 @@
 	veteran_only = TRUE
 	job_flags = JOB_ANNOUNCE_ARRIVAL | JOB_CREW_MANIFEST | JOB_EQUIP_RANK | JOB_CREW_MEMBER | JOB_NEW_PLAYER_JOINABLE | JOB_BOLD_SELECT_TEXT | JOB_REOPEN_ON_ROUNDSTART_LOSS | JOB_ASSIGN_QUIRKS
 
-/datum/job/nanotrasen_consultant/after_spawn(mob/living/H, mob/M, latejoin)
-	. = ..()
-	to_chat(H, span_boldannounce("As the Nanotrasen Consultant, you are required to follow the following placeholder policy and SOP: https://paradisestation.org/wiki/index.php/nanotrasen_consultant"))
-	//REMOVE THIS AFTER FAX MACHINES ARE ADDED!!!!
-	to_chat(H, span_boldannounce("If you require IC admin intervention, send an admin help until the fax machine is added."))
-
 /datum/outfit/job/nanotrasen_consultant
 	name = "Nanotrasen Consultant"
 	jobtype = /datum/job/nanotrasen_consultant
 
-	belt = /obj/item/pda/nanotrasen_consultant
+	belt = /obj/item/modular_computer/tablet/pda/nanotrasen_consultant
 	glasses = /obj/item/clothing/glasses/sunglasses
 	ears = /obj/item/radio/headset/heads/nanotrasen_consultant
 	gloves = /obj/item/clothing/gloves/combat
@@ -58,7 +52,10 @@
 	suit = /obj/item/clothing/suit/armor/vest/nanotrasen_consultant
 	shoes = /obj/item/clothing/shoes/jackboots
 	head = /obj/item/clothing/head/nanotrasen_consultant
-	backpack_contents = list(/obj/item/melee/baton/telescopic)
+	backpack_contents = list(
+		/obj/item/melee/baton/telescopic = 1,
+		/obj/item/storage/box/gunset/nanotrasen_consultant = 1,
+		)
 
 	skillchips = list(/obj/item/skillchip/disk_verifier)
 
@@ -108,14 +105,14 @@
 	gloves = /obj/item/clothing/gloves/color/captain //Too iconic to be replaced with a plasma version
 	head = /obj/item/clothing/head/helmet/space/plasmaman/centcom_official
 
-/obj/item/pda/nanotrasen_consultant
+/obj/item/modular_computer/tablet/pda/nanotrasen_consultant
 	name = "nanotrasen consultant's PDA"
-	default_cartridge = /obj/item/cartridge/captain
+	loaded_cartridge = /obj/item/computer_hardware/hard_drive/portable/command/captain
 	inserted_item = /obj/item/pen/fountain/captain
 	greyscale_colors = "#017941#0060b8"
 
 /obj/item/storage/box/gunset/nanotrasen_consultant
-	name = "M45A5 Gunset"
+	name = "M45A5 gunset"
 	w_class = WEIGHT_CLASS_NORMAL
 
 /obj/item/gun/ballistic/automatic/pistol/m45a5/nomag
@@ -144,7 +141,7 @@
 	new /obj/item/pet_carrier(src)
 	new /obj/item/clothing/shoes/sneakers/brown(src)
 	new /obj/item/clothing/suit/armor/vest(src)
-	new /obj/item/cartridge/captain(src)
+	new /obj/item/computer_hardware/hard_drive/portable/command/captain(src)
 	new /obj/item/radio/headset/heads/nanotrasen_consultant/alt(src)
 	new /obj/item/radio/headset/heads/nanotrasen_consultant(src)
 	new /obj/item/clothing/glasses/sunglasses/gar/giga(src)
@@ -152,4 +149,3 @@
 	new /obj/item/storage/photo_album/personal(src)
 	new /obj/item/bedsheet/centcom(src)
 	new /obj/item/clothing/suit/hooded/wintercoat/centcom/nt_consultant(src)
-	new /obj/item/gun/energy/e_gun(src)

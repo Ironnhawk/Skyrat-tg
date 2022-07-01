@@ -17,14 +17,6 @@
 		else if (!((antag_preference || antag_flag) in P.client.prefs.be_special) || is_banned_from(P.ckey, list(antag_flag_override || antag_flag, ROLE_SYNDICATE)))
 			candidates.Remove(P)
 		// SKYRAT EDIT ADDITION - PROTECTED JOBS
-		else if(P.mind.assigned_role.antagonist_restricted)
-			if(P.mind.assigned_role.restricted_antagonists)
-				if(antag_flag in P.mind.assigned_role.restricted_antagonists)
-					candidates.Remove(P)
-					continue
-			else //Assume it's all antagonist roles.
-				candidates.Remove(P)
-				continue
 		else if(P.client?.prefs && !P.client.prefs.read_preference(/datum/preference/toggle/be_antag))
 			candidates.Remove(P)
 			continue
@@ -106,6 +98,7 @@
 		JOB_HEAD_OF_PERSONNEL,
 		JOB_HEAD_OF_SECURITY,
 		JOB_PRISONER,
+		JOB_QUARTERMASTER,
 		JOB_RESEARCH_DIRECTOR,
 		JOB_SECURITY_OFFICER,
 		JOB_WARDEN,
@@ -123,7 +116,7 @@
 	required_candidates = 1
 	weight = 2
 	delay = 1 MINUTES // Prevents rule start while head is offstation.
-	cost = 20
+	cost = 10
 	requirements = list(101,101,70,40,30,20,20,20,20,20)
 	flags = HIGH_IMPACT_RULESET
 	blocking_rules = list(/datum/dynamic_ruleset/roundstart/revs)
@@ -208,7 +201,7 @@
 	)
 	required_candidates = 1
 	weight = 4
-	cost = 10
+	cost = 7
 	requirements = list(101,101,101,10,10,10,10,10,10,10)
 	repeatable = TRUE
 
