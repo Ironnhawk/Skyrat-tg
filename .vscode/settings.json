@@ -39,5 +39,11 @@
 		"editor.rulers": [80],
 		"editor.defaultFormatter": "esbenp.prettier-vscode",
 		"editor.formatOnSave": true
-	}
+	},
+	"favorites.resources": [
+		{
+			"filePath": "code\\modules",
+			"group": "Default"
+		}
+	]
 }

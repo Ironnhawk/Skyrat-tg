@@ -1,0 +1,4 @@
+#TODO
+* Need a new ability template to manage all new abilities.
+* Abilities should be added with datum component where applicable and replace timers with signals.
+* Remove all use of /datum/extension
