@@ -15,26 +15,29 @@
 	data["selected_module"] = selected_module?.name
 	data["wearer_name"] = wearer ? (wearer.get_authentification_name("Unknown") || "Unknown") : "No Occupant"
 	data["wearer_job"] = wearer ? wearer.get_assignment("Unknown", "Unknown", FALSE) : "No Job"
-	data["AI"] = ai?.name
+	// SKYRAT EDIT START - pAIs in MODsuits
+	data["pAI"] = mod_pai?.name
+	data["ispAI"] = mod_pai ? mod_pai == user : FALSE
+	// SKYRAT EDIT END
 	data["core"] = core?.name
 	data["charge"] = get_charge_percent()
 	data["modules"] = list()
 	for(var/obj/item/mod/module/module as anything in modules)
 		var/list/module_data = list(
-			name = module.name,
-			description = module.desc,
-			module_type = module.module_type,
-			active = module.active,
-			pinned = module.pinned_to[user],
-			idle_power = module.idle_power_cost,
-			active_power = module.active_power_cost,
-			use_power = module.use_power_cost,
-			complexity = module.complexity,
-			cooldown_time = module.cooldown_time,
-			cooldown = round(COOLDOWN_TIMELEFT(module, cooldown_timer), 1 SECONDS),
-			id = module.tgui_id,
-			ref = REF(module),
-			configuration_data = module.get_configuration()
+			"module_name" = module.name,
+			"description" = module.desc,
+			"module_type" = module.module_type,
+			"module_active" = module.active,
+			"pinned" = module.pinned_to[user],
+			"idle_power" = module.idle_power_cost,
+			"active_power" = module.active_power_cost,
+			"use_power" = module.use_power_cost,
+			"module_complexity" = module.complexity,
+			"cooldown_time" = module.cooldown_time,
+			"cooldown" = round(COOLDOWN_TIMELEFT(module, cooldown_timer), 1 SECONDS),
+			"id" = module.tgui_id,
+			"ref" = REF(module),
+			"configuration_data" = module.get_configuration()
 		)
 		module_data += module.add_ui_data()
 		data["modules"] += list(module_data)
@@ -55,7 +58,8 @@
 	. = ..()
 	if(.)
 		return
-	if(!allowed(usr) && locked)
+	// allowed() doesn't allow for pAIs
+	if((!allowed(usr) || !ispAI(usr)) && locked) // SKYRAT EDIT - pAIs in MODsuits
 		balloon_alert(usr, "insufficient access!")
 		playsound(src, 'sound/machines/scanbuzz.ogg', 25, TRUE, SILENCED_SOUND_EXTRARANGE)
 		return
@@ -83,4 +87,10 @@
 			if(!module)
 				return
 			module.pin(usr)
+		// SKYRAT EDIT START - pAIs in MODsuits
+		if("remove_pai")
+			if(ishuman(usr)) // Only the MODsuit's wearer should be removing the pAI.
+				var/mob/user = usr
+				extract_pai(user)
+		// SKYRAT EDIT END
 	return TRUE

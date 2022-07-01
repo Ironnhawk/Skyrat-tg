@@ -73,9 +73,9 @@
 			name = "internals crate"
 			icon_state = "o2crate"
 		if(4)
-			new /obj/item/storage/firstaid/regular(src)
-			new /obj/item/storage/firstaid/o2(src)
-			new /obj/item/storage/firstaid/toxin(src)
+			new /obj/item/storage/medkit/regular(src)
+			new /obj/item/storage/medkit/o2(src)
+			new /obj/item/storage/medkit/toxin(src)
 			new /obj/item/reagent_containers/hypospray/medipen(src)
 			new /obj/item/reagent_containers/hypospray/medipen/ekit(src)
 			desc = "A medical crate."
@@ -158,7 +158,7 @@
 			new /obj/item/gun/energy/e_gun(src)
 			new /obj/item/gun/energy/e_gun(src)
 			new /obj/item/gun/energy/e_gun/mini(src)
-			new /obj/item/gun/energy/kinetic_accelerator/crossbow(src)
+			new /obj/item/gun/energy/recharge/ebow(src)
 			new /obj/item/gun/energy/e_gun/nuclear(src)
 			new /obj/item/melee/energy/sword(src)
 			new /obj/item/melee/energy/sword(src)
@@ -191,11 +191,11 @@
 			new /obj/item/mod/control/pre_equipped/elite(src)
 		if(5) //Implants
 			new /obj/item/storage/box/cyber_implants(src)
-			new /obj/item/organ/cyberimp/arm/combat(src)
-			new /obj/item/organ/cyberimp/arm/surgery(src)
-			new /obj/item/organ/cyberimp/arm/baton(src)
-			new /obj/item/organ/cyberimp/arm/toolset(src)
-			new /obj/item/organ/cyberimp/arm/gun/taser(src)
+			new /obj/item/organ/internal/cyberimp/arm/combat(src)
+			new /obj/item/organ/internal/cyberimp/arm/surgery(src)
+			new /obj/item/organ/internal/cyberimp/arm/baton(src)
+			new /obj/item/organ/internal/cyberimp/arm/toolset(src)
+			new /obj/item/organ/internal/cyberimp/arm/gun/taser(src)
 
 /obj/structure/closet/crate/secure/tradership_cargo_very_valuable
 	req_access = ACCESS_FACTION_COMMAND

@@ -215,7 +215,7 @@
 	check_flags = AB_CHECK_CONSCIOUS
 	button_icon_state = "recruit"
 	icon_icon = 'icons/obj/gang/actions.dmi'
-	cooldown_time = 60 SECONDS // SKYRAT EDIT: 30 SECONDS -> 60 SECONDS
+	cooldown_time = 300
 	/// The family antagonist datum of the "owner" of this action.
 	var/datum/antagonist/gang/my_gang_datum
 
@@ -239,7 +239,7 @@
 	if(human_owner.stat != CONSCIOUS || human_owner.incapacitated())
 		return FALSE
 
-	var/obj/item/slapper/secret_handshake/secret_handshake_item = new(owner)
+	var/obj/item/hand_item/slapper/secret_handshake/secret_handshake_item = new(owner)
 	if(owner.put_in_hands(secret_handshake_item))
 		to_chat(owner, span_notice("You ready your secret handshake."))
 	else
@@ -321,7 +321,7 @@
 	gang_id = "TS"
 	acceptable_clothes = list(/obj/item/clothing/under/pants/classicjeans,
 		/obj/item/clothing/suit/jacket,
-		/obj/item/clothing/mask/bandana/skull)
+		/obj/item/clothing/mask/bandana/skull/black)
 	free_clothes = list(/obj/item/clothing/suit/jacket,
 		/obj/item/clothing/under/pants/classicjeans,
 		/obj/item/toy/crayon/spraycan)

@@ -52,11 +52,14 @@
 	var/static/default_martial_art = new/datum/martial_art
 	var/miming = FALSE // Mime's vow of silence
 	var/list/antag_datums
-	var/antag_hud_icon_state = null //this mind's ANTAG_HUD should have this icon_state
-	var/datum/atom_hud/alternate_appearance/basic/antagonist_hud/antag_hud = null //this mind's antag HUD
+	///this mind's ANTAG_HUD should have this icon_state
+	var/antag_hud_icon_state = null
+	///this mind's antag HUD
+	var/datum/atom_hud/alternate_appearance/basic/antagonist_hud/antag_hud = null
 	var/holy_role = NONE //is this person a chaplain or admin role allowed to use bibles, Any rank besides 'NONE' allows for this.
 
-	var/mob/living/enslaved_to //If this mind's master is another mob (i.e. adamantine golems)
+	///If this mind's master is another mob (i.e. adamantine golems)
+	var/mob/living/enslaved_to
 	var/datum/language_holder/language_holder
 	var/unconvertable = FALSE
 	var/late_joiner = FALSE
@@ -92,9 +95,8 @@
 	var/list/active_addictions
 	///List of objective-specific equipment that couldn't properly be given to the mind
 	var/list/failed_special_equipment
-	// SKYRAT EDIT ADDITION -- EXPLOITABLE MENU
-	///Tracks if the target has the view_exploitables_verb verb. THIS MUST BE CHANGED IF THE VERB IS ADDED OR REMOVED OR ELSE STUFF BREAKS.
-	var/has_exploitable_menu = FALSE
+	/// A list to keep track of which books a person has read (to prevent people from reading the same book again and again for positive mood events)
+	var/list/book_titles_read
 
 /datum/mind/New(_key)
 	key = _key
@@ -261,12 +263,12 @@
 	if(!length(shown_skills))
 		to_chat(user, span_notice("You don't seem to have any particularly outstanding skills."))
 		return
-	var/msg = "[span_info("<EM>Your skills</EM>")]\n<span class='notice'><hr>" //SKYRAT EDIT CHANGE
+	var/msg = "[span_info("<EM>Your skills</EM>")]\n<span class='notice'>"
 	for(var/i in shown_skills)
 		var/datum/skill/the_skill = i
 		msg += "[initial(the_skill.name)] - [get_skill_level_name(the_skill)]\n"
 	msg += "</span>"
-	to_chat(user, examine_block(msg)) //SKYRAT EDIT CHANGE
+	to_chat(user, examine_block(msg))
 
 /datum/mind/proc/set_death_time()
 	SIGNAL_HANDLER
@@ -301,7 +303,7 @@
 		antag_team.add_member(src)
 	INVOKE_ASYNC(A, /datum/antagonist.proc/on_gain)
 	log_game("[key_name(src)] has gained antag datum [A.name]([A.type])")
-	src.handle_exploitables_menu() //SKYRAT EDIT ADDITION - EXPLOITABLES MENU
+	handle_exploitables() //SKYRAT EDIT ADDITION - EXPLOITABLES MENU
 	return A
 
 /datum/mind/proc/remove_antag_datum(datum_type)
@@ -310,7 +312,6 @@
 	var/datum/antagonist/A = has_antag_datum(datum_type)
 	if(A)
 		A.on_removal()
-		src.handle_exploitables_menu() //SKYRAT EDIT ADDITION - EXPLOITABLE MENU
 
 		return TRUE
 
@@ -319,11 +320,6 @@
 	for(var/a in antag_datums)
 		var/datum/antagonist/A = a
 		A.on_removal()
-	//SKYRAT EDIT ADDITION BEGIN - EXPLOITABLE MENU
-	if (has_exploitable_menu)
-		remove_verb(current, /mob/proc/view_exploitables_verb)
-		has_exploitable_menu = FALSE
-	//SKYRAT EDIT ADDITION END
 
 /datum/mind/proc/has_antag_datum(datum_type, check_subtypes = TRUE)
 	if(!datum_type)
@@ -396,7 +392,7 @@
 		return
 
 	var/list/all_contents = traitor_mob.get_all_contents()
-	var/obj/item/pda/PDA = locate() in all_contents
+	var/obj/item/modular_computer/tablet/pda/PDA = locate() in all_contents
 	var/obj/item/radio/R = locate() in all_contents
 	var/obj/item/pen/P
 
@@ -449,7 +445,7 @@
 	if(uplink_loc == R)
 		unlock_text = "Your Uplink is cunningly disguised as your [R.name]. Simply dial the frequency [format_frequency(new_uplink.unlock_code)] to unlock its hidden features."
 	else if(uplink_loc == PDA)
-		unlock_text = "Your Uplink is cunningly disguised as your [PDA.name]. Simply enter the code \"[new_uplink.unlock_code]\" into the ringtone select to unlock its hidden features."
+		unlock_text = "Your Uplink is cunningly disguised as your [PDA.name]. Simply enter the code \"[new_uplink.unlock_code]\" into the ring tone selection to unlock its hidden features."
 	else if(uplink_loc == P)
 		unlock_text = "Your Uplink is cunningly disguised as your [P.name]. Simply twist the top of the pen [english_list(new_uplink.unlock_code)] from its starting position to unlock its hidden features."
 	new_uplink.unlock_text = unlock_text
@@ -493,12 +489,20 @@
 
 	if(href_list["add_antag"])
 		add_antag_wrapper(text2path(href_list["add_antag"]),usr)
+
 	if(href_list["remove_antag"])
 		var/datum/antagonist/A = locate(href_list["remove_antag"]) in antag_datums
 		if(!istype(A))
 			to_chat(usr,span_warning("Invalid antagonist ref to be removed."))
 			return
 		A.admin_remove(usr)
+
+	if(href_list["open_antag_vv"])
+		var/datum/antagonist/to_vv = locate(href_list["open_antag_vv"]) in antag_datums
+		if(!istype(to_vv))
+			to_chat(usr, span_warning("Invalid antagonist ref to be vv'd."))
+			return
+		usr.client?.debug_variables(to_vv)
 
 	if (href_list["role_edit"])
 		var/new_role = input("Select new role", "Assigned role", assigned_role.title) as null|anything in sort_list(SSjob.name_occupations)
@@ -719,6 +723,13 @@
 					log_admin("[key_name(usr)] tried and failed to give [current] an uplink.")
 				else
 					log_admin("[key_name(usr)] gave [current] an uplink.")
+			//SKYRAT EDIT ADDITION BEGIN -- EXPLOITABLES
+			if("toggle_exploitables")
+				has_exploitables_override = !has_exploitables_override //First we set the override to be the opposite of whatever it was apon execution, then we
+				handle_exploitables() // use ternaries to convert this into true/false for admin logs.
+				log_admin("[key_name(usr)] toggled [current]'s exploitables override to [(has_exploitables_override) ? "true" : "false"].")
+				message_admins("[key_name(usr)] toggled [current]'s exploitables override to [(has_exploitables_override) ? "true" : "false"].")
+			//SKYRAT EDIT ADDITION END
 
 	else if (href_list["obj_announce"])
 		announce_objectives()
@@ -808,7 +819,7 @@
 		if(istype(S, spell))
 			spell_list -= S
 			qdel(S)
-	current?.client << output(null, "statbrowser:check_spells")
+	current?.client.stat_panel.send_message("check_spells")
 
 /datum/mind/proc/RemoveAllSpells()
 	for(var/obj/effect/proc_holder/S in spell_list)
@@ -841,7 +852,7 @@
 			if(istype(S, type))
 				continue
 		S.charge_counter = delay
-		S.updateButtonIcon()
+		S.updateButtons()
 		INVOKE_ASYNC(S, /obj/effect/proc_holder/spell.proc/start_recharge)
 
 /datum/mind/proc/get_ghost(even_if_they_cant_reenter, ghosts_with_clients)

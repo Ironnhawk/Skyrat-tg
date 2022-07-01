@@ -109,12 +109,13 @@
 		return
 
 	var/mob/living/carbon/possible_throwable = user.pulling
-	if(!possible_throwable.getorganslot(ORGAN_SLOT_TAIL))
+	if(!possible_throwable.getorganslot(ORGAN_SLOT_EXTERNAL_TAIL))
 		return
 
 	if(ishuman(possible_throwable))
 		var/mob/living/carbon/human/human_throwable = possible_throwable
-		if(human_throwable.wear_suit && (human_throwable.wear_suit.flags_inv & HIDEJUMPSUIT))
+		//if(human_throwable.wear_suit && (human_throwable.wear_suit.flags_inv & HIDEJUMPSUIT)) // ORIGINAL
+		if(human_throwable.wear_suit && (human_throwable.wear_suit.flags_inv & HIDETAIL)) // SKYRAT EDIT CHANGE
 			to_chat(user, span_warning("You can't reach [human_throwable]'s tail through [human_throwable.p_their()] [human_throwable.wear_suit.name]!"))
 			return
 
@@ -240,7 +241,7 @@
 	yeeted_person.visible_message(span_danger("[the_hulk] throws [yeeted_person]!"), \
 					span_userdanger("You're thrown by [the_hulk]!"), span_hear("You hear aggressive shuffling and a loud thud!"), null, the_hulk)
 	to_chat(the_hulk, span_danger("You throw [yeeted_person]!"))
-	playsound(the_hulk.loc, "swing_hit", 50, TRUE)
+	playsound(the_hulk.loc, SFX_SWING_HIT, 50, TRUE)
 	var/turf/T = get_edge_target_turf(the_hulk, the_hulk.dir)
 	if(!isturf(T))
 		return

@@ -39,7 +39,7 @@
 
 //SKYRAT EDIT ADD
 ///Amount of synthflesh required to unhusk someone
-#define SYNTHFLESH_LING_UNHUSK_AMOUNT 150
+#define SYNTHFLESH_LING_UNHUSK_AMOUNT 200
 
 //used by chem masters and pill presses
 #define PILL_STYLE_COUNT 22 //Update this if you add more pill icons or you die
@@ -124,7 +124,7 @@
 #define MAX_ADDICTION_POINTS 1000
 
 ///Addiction start/ends
-#define WITHDRAWAL_STAGE1_START_CYCLE 60
+#define WITHDRAWAL_STAGE1_START_CYCLE 61
 #define WITHDRAWAL_STAGE1_END_CYCLE 120
 #define WITHDRAWAL_STAGE2_START_CYCLE 121
 #define WITHDRAWAL_STAGE2_END_CYCLE 180

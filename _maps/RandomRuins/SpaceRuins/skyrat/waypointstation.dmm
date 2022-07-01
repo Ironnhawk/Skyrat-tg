@@ -35,9 +35,8 @@
 /turf/open/floor/iron/airless,
 /area/ruin/space/has_grav/waypoint)
 "bG" = (
-/turf/open/floor/plating/airless{
-	icon_state = "platingdmg1"
-	},
+/obj/effect/mapping_helpers/broken_floor,
+/turf/open/floor/plating/airless,
 /area/ruin/space/has_grav/waypoint)
 "bY" = (
 /obj/effect/decal/cleanable/xenoblood/xgibs/core,
@@ -132,9 +131,8 @@
 /area/ruin/space/has_grav/waypoint)
 "gW" = (
 /obj/structure/door_assembly/door_assembly_ext,
-/turf/open/floor/plating/airless{
-	icon_state = "platingdmg1"
-	},
+/obj/effect/mapping_helpers/broken_floor,
+/turf/open/floor/plating/airless,
 /area/ruin/space/has_grav/waypoint)
 "hl" = (
 /turf/closed/wall/r_wall,
@@ -246,11 +244,6 @@
 /obj/effect/mob_spawn/corpse/human/assistant,
 /turf/open/floor/iron/airless,
 /area/ruin/space/has_grav/waypoint)
-"nA" = (
-/turf/open/floor/plating/airless{
-	icon_state = "platingdmg2"
-	},
-/area/ruin/space/has_grav/waypoint)
 "nC" = (
 /mob/living/simple_animal/hostile/alien/drone,
 /turf/open/floor/iron/airless,
@@ -276,10 +269,6 @@
 /obj/effect/decal/cleanable/blood/splatter,
 /turf/open/floor/iron/airless,
 /area/ruin/space/has_grav/waypoint)
-"pt" = (
-/obj/effect/decal/cleanable/blood/splatter,
-/turf/open/floor/iron/goonplaque,
-/area/ruin/space/has_grav/waypoint)
 "pB" = (
 /obj/item/stack/sheet/iron,
 /turf/open/floor/iron/airless,
@@ -301,7 +290,7 @@
 /turf/open/floor/iron/airless,
 /area/ruin/space/has_grav/waypoint)
 "pO" = (
-/turf/open/floor/plating/asteroid/airless,
+/turf/open/misc/asteroid/airless,
 /area/ruin/space)
 "pP" = (
 /obj/structure/closet/crate/large,
@@ -417,7 +406,7 @@
 /turf/open/floor/iron/airless,
 /area/ruin/space/has_grav/waypoint)
 "uA" = (
-/obj/machinery/door/window/brigdoor/westleft,
+/obj/machinery/door/window/brigdoor/left/directional/west,
 /obj/machinery/door/firedoor/closed,
 /turf/open/floor/plating/airless,
 /area/ruin/space/has_grav/waypoint)
@@ -453,9 +442,8 @@
 /area/ruin/space/has_grav/waypoint)
 "xw" = (
 /obj/machinery/portable_atmospherics/canister/plasma,
-/turf/open/floor/plating/airless{
-	icon_state = "platingdmg2"
-	},
+/obj/effect/mapping_helpers/broken_floor,
+/turf/open/floor/plating/airless,
 /area/ruin/space/has_grav/waypoint)
 "xO" = (
 /obj/structure/frame/computer{
@@ -695,9 +683,8 @@
 /area/ruin/space/has_grav/waypoint)
 "IC" = (
 /obj/item/bodypart/l_arm,
-/turf/open/floor/plating/airless{
-	icon_state = "platingdmg3"
-	},
+/obj/effect/mapping_helpers/broken_floor,
+/turf/open/floor/plating/airless,
 /area/ruin/space/has_grav/waypoint)
 "IM" = (
 /obj/item/shard{
@@ -838,7 +825,7 @@
 /area/ruin/space/has_grav/waypoint)
 "OQ" = (
 /obj/structure/door_assembly/door_assembly_com,
-/turf/open/floor/plating,
+/turf/open/floor/plating/airless,
 /area/ruin/space/has_grav/waypoint)
 "Pg" = (
 /obj/item/clothing/head/helmet/swat{
@@ -896,9 +883,8 @@
 /area/template_noop)
 "QC" = (
 /obj/item/shard,
-/turf/open/floor/plating/airless{
-	icon_state = "platingdmg3"
-	},
+/obj/effect/mapping_helpers/broken_floor,
+/turf/open/floor/plating/airless,
 /area/ruin/space/has_grav/waypoint)
 "QT" = (
 /obj/machinery/computer,
@@ -908,11 +894,6 @@
 /obj/item/stack/sheet/iron,
 /turf/template_noop,
 /area/template_noop)
-"RC" = (
-/turf/open/floor/plating/airless{
-	icon_state = "platingdmg3"
-	},
-/area/ruin/space/has_grav/waypoint)
 "RE" = (
 /obj/effect/decal/cleanable/blood,
 /obj/machinery/light/small/broken{
@@ -1476,7 +1457,7 @@ ka
 rh
 pB
 ka
-RC
+bG
 dQ
 Ke
 Ke
@@ -1537,7 +1518,7 @@ qh
 ka
 ka
 Pj
-nA
+bG
 ju
 Ke
 Ke
@@ -1662,7 +1643,7 @@ lU
 qh
 yn
 zu
-RC
+bG
 ju
 Ke
 Ke
@@ -1790,7 +1771,7 @@ bG
 bG
 Um
 ju
-nA
+bG
 Ke
 bG
 Wg
@@ -1855,7 +1836,7 @@ OQ
 ka
 ju
 ay
-RC
+bG
 ka
 Pj
 Pj
@@ -1918,7 +1899,7 @@ Pj
 ka
 Pj
 Pj
-nA
+bG
 Pj
 bG
 Pj
@@ -1934,7 +1915,7 @@ Pj
 Pj
 Pj
 eZ
-pt
+on
 Pj
 Pj
 cV
@@ -2008,7 +1989,7 @@ Al
 Pj
 Pj
 QC
-nA
+bG
 ju
 ka
 bG
@@ -2137,7 +2118,7 @@ Jj
 eP
 eP
 ju
-nA
+bG
 OC
 eP
 eP
@@ -2200,7 +2181,7 @@ eP
 eP
 ju
 ju
-RC
+bG
 eP
 eP
 eP
@@ -2912,7 +2893,7 @@ eP
 eP
 bG
 IC
-nA
+bG
 ju
 OC
 eP
@@ -2927,7 +2908,7 @@ eP
 OC
 bG
 ju
-nA
+bG
 OC
 eP
 eP
@@ -3048,7 +3029,7 @@ Rk
 eP
 eP
 eP
-RC
+bG
 ju
 Ke
 dQ

@@ -142,6 +142,7 @@ GLOBAL_VAR(restart_counter)
 	GLOB.world_pda_log = "[GLOB.log_directory]/pda.log"
 	GLOB.world_uplink_log = "[GLOB.log_directory]/uplink.log"
 	GLOB.world_telecomms_log = "[GLOB.log_directory]/telecomms.log"
+	GLOB.world_speech_indicators_log = "[GLOB.log_directory]/speech_indicators.log"
 	GLOB.world_manifest_log = "[GLOB.log_directory]/manifest.log"
 	GLOB.world_href_log = "[GLOB.log_directory]/hrefs.log"
 	GLOB.world_mob_tag_log = "[GLOB.log_directory]/mob_tags.log"
@@ -154,8 +155,13 @@ GLOBAL_VAR(restart_counter)
 	GLOB.world_paper_log = "[GLOB.log_directory]/paper.log"
 	GLOB.tgui_log = "[GLOB.log_directory]/tgui.log"
 	GLOB.world_shuttle_log = "[GLOB.log_directory]/shuttle.log"
+	GLOB.filter_log = "[GLOB.log_directory]/filters.log"
+
+	GLOB.character_creation_log = "[GLOB.log_directory]/creator.log" // SKYRAT EDIT ADDITION
 
 	GLOB.demo_log = "[GLOB.log_directory]/demo.log"
+
+	GLOB.event_vote_log = "[GLOB.log_directory]/event_vote.log" // SKYRAT EDIT ADDITION
 
 #ifdef UNIT_TESTS
 	GLOB.test_log = "[GLOB.log_directory]/tests.log"
@@ -179,6 +185,10 @@ GLOBAL_VAR(restart_counter)
 	start_log(GLOB.world_job_debug_log)
 	start_log(GLOB.tgui_log)
 	start_log(GLOB.world_shuttle_log)
+	// SKYRAT EDIT ADDITION
+	start_log(GLOB.event_vote_log)
+	start_log(GLOB.character_creation_log)
+	// SKYRAT EDIT END
 
 	var/latest_changelog = file("[global.config.directory]/../html/changelogs/archive/" + time2text(world.timeofday, "YYYY-MM") + ".yml")
 	GLOB.changelog_hash = fexists(latest_changelog) ? md5(latest_changelog) : 0 //for telling if the changelog has changed recently
@@ -338,6 +348,11 @@ GLOBAL_VAR(restart_counter)
 
 	if (features)
 		s += ": [jointext(features, ", ")]"
+
+	s += "<br>Round time: <b>[gameTimestamp("hh:mm")]</b>"
+	if(SSmapping.config)
+		s += "<br>Map: <b>[SSmapping.config.map_path == CUSTOM_MAP_PATH ? "Uncharted Territory" : SSmapping.config.map_name]</b>"
+	s += "<br>Alert level: <b>[capitalize(SSsecurity_level.get_current_level_as_text())]</b>"
 
 	status = s
 */

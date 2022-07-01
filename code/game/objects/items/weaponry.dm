@@ -446,6 +446,41 @@ for further reading, please see: https://github.com/tgstation/tgstation/pull/301
 	attack_verb_continuous = list("bludgeons", "whacks", "disciplines", "thrashes")
 	attack_verb_simple = list("bludgeon", "whack", "discipline", "thrash")
 
+/obj/item/cane/white
+	name = "white cane"
+	desc = "A cane traditionally used by the blind to help them see. Folds down to be easier to transport."
+	icon_state = "cane_white"
+	inhand_icon_state = null
+	lefthand_file = 'icons/mob/inhands/weapons/melee_lefthand.dmi'
+	righthand_file = 'icons/mob/inhands/weapons/melee_righthand.dmi'
+	force = 1
+	w_class = WEIGHT_CLASS_SMALL
+	custom_materials = list(/datum/material/iron = 600)
+
+/obj/item/cane/white/Initialize(mapload)
+	. = ..()
+	AddComponent(/datum/component/transforming, \
+		force_on = 7, \
+		hitsound_on = hitsound, \
+		w_class_on = WEIGHT_CLASS_BULKY, \
+		clumsy_check = FALSE, \
+		attack_verb_continuous_on = list("smacks", "strikes", "cracks", "beats"), \
+		attack_verb_simple_on = list("smack", "strike", "crack", "beat"))
+	RegisterSignal(src, COMSIG_TRANSFORMING_ON_TRANSFORM, .proc/on_transform)
+	ADD_TRAIT(src, TRAIT_BLIND_TOOL, ITEM_BLIND_TRAIT)
+
+/*
+ * Signal proc for [COMSIG_TRANSFORMING_ON_TRANSFORM].
+ *
+ * Gives feedback to the user and makes it show up inhand.
+ */
+/obj/item/cane/white/proc/on_transform(obj/item/source, mob/user, active)
+	SIGNAL_HANDLER
+
+	balloon_alert(user, active ? "extended" : "collapsed")
+	playsound(user ? user : src, 'sound/weapons/batonextend.ogg', 50, TRUE)
+	return COMPONENT_NO_DEFAULT_MESSAGE
+
 /obj/item/staff
 	name = "wizard staff"
 	desc = "Apparently a staff used by the wizard."
@@ -616,7 +651,7 @@ for further reading, please see: https://github.com/tgstation/tgstation/pull/301
 	icon_state = "skateboard2"
 	inhand_icon_state = "skateboard2"
 	board_item_type = /obj/vehicle/ridden/scooter/skateboard/pro
-	custom_premium_price = PAYCHECK_HARD * 5
+	custom_premium_price = PAYCHECK_COMMAND * 5
 
 /obj/item/melee/skateboard/hoverboard
 	name = "hoverboard"
@@ -644,6 +679,7 @@ for further reading, please see: https://github.com/tgstation/tgstation/pull/301
 	force = 12
 	wound_bonus = -10
 	throwforce = 12
+	demolition_mod = 1.25
 	attack_verb_continuous = list("beats", "smacks")
 	attack_verb_simple = list("beat", "smack")
 	custom_materials = list(/datum/material/wood = MINERAL_MATERIAL_AMOUNT * 3.5)
@@ -801,7 +837,7 @@ for further reading, please see: https://github.com/tgstation/tgstation/pull/301
 	desc = "A wooden stick with white streamers at the end. Originally used by shrine maidens to purify things. Now used by the station's valued weeaboos."
 	force = 5
 	throwforce = 5
-	hitsound = "swing_hit"
+	hitsound = SFX_SWING_HIT
 	attack_verb_continuous = list("whacks", "thwacks", "wallops", "socks")
 	attack_verb_simple = list("whack", "thwack", "wallop", "sock")
 	icon = 'icons/obj/items_and_weapons.dmi'
@@ -848,8 +884,8 @@ for further reading, please see: https://github.com/tgstation/tgstation/pull/301
 	sharpness = SHARP_EDGED
 	w_class = WEIGHT_CLASS_BULKY
 	slot_flags = ITEM_SLOT_BACK
-	/// Wielding status.
-	var/wielded = FALSE
+	/// The color of the slash we create
+	var/slash_color = COLOR_BLUE
 	/// Previous x position of where we clicked on the target's icon
 	var/previous_x
 	/// Previous y position of where we clicked on the target's icon
@@ -859,58 +895,50 @@ for further reading, please see: https://github.com/tgstation/tgstation/pull/301
 
 /obj/item/highfrequencyblade/Initialize(mapload)
 	. = ..()
-	RegisterSignal(src, COMSIG_TWOHANDED_WIELD, .proc/on_wield)
-	RegisterSignal(src, COMSIG_TWOHANDED_UNWIELD, .proc/on_unwield)
 	AddElement(/datum/element/update_icon_updates_onmob)
 
 /obj/item/highfrequencyblade/ComponentInitialize()
 	. = ..()
-	AddComponent(/datum/component/two_handed)
+	AddComponent(/datum/component/two_handed, wield_callback = CALLBACK(src, .proc/on_wield), unwield_callback = CALLBACK(src, .proc/on_unwield))
 
 /obj/item/highfrequencyblade/update_icon_state()
-	icon_state = "hfrequency[wielded]"
+	icon_state = "hfrequency[HAS_TRAIT(src, TRAIT_WIELDED)]"
 	return ..()
 
 /obj/item/highfrequencyblade/hit_reaction(mob/living/carbon/human/owner, atom/movable/hitby, attack_text = "the attack", final_block_chance = 0, damage = 0, attack_type = MELEE_ATTACK)
 	if(attack_type == PROJECTILE_ATTACK)
-		if(wielded || prob(final_block_chance))
+		if(HAS_TRAIT(src, TRAIT_WIELDED) || prob(final_block_chance))
 			owner.visible_message(span_danger("[owner] deflects [attack_text] with [src]!"))
 			playsound(src, pick('sound/weapons/bulletflyby.ogg', 'sound/weapons/bulletflyby2.ogg', 'sound/weapons/bulletflyby3.ogg'), 75, TRUE)
 			return TRUE
 		return FALSE
-	if(prob(final_block_chance * (wielded ? 2 : 1)))
+	if(prob(final_block_chance * (HAS_TRAIT(src, TRAIT_WIELDED) ? 2 : 1)))
 		owner.visible_message(span_danger("[owner] parries [attack_text] with [src]!"))
 		return TRUE
 
 /obj/item/highfrequencyblade/attack(mob/living/target, mob/living/user, params)
-	if(!wielded)
+	if(!HAS_TRAIT(src, TRAIT_WIELDED))
 		return ..()
 	slash(target, user, params)
 
 /obj/item/highfrequencyblade/attack_atom(atom/target, mob/living/user, params)
-	if(wielded)
+	if(HAS_TRAIT(src, TRAIT_WIELDED))
 		return
 	return ..()
 
 /obj/item/highfrequencyblade/afterattack(atom/target, mob/user, proximity_flag, params)
-	if(!wielded)
+	if(!HAS_TRAIT(src, TRAIT_WIELDED))
 		return ..()
-	if(!proximity_flag || !(isclosedturf(target) || isitem(target) || ismachinery(target) || isstructure(target)))
+	if(!proximity_flag || !(isclosedturf(target) || isitem(target) || ismachinery(target) || isstructure(target) || isvehicle(target)))
 		return
 	slash(target, user, params)
 
 /// triggered on wield of two handed item
 /obj/item/highfrequencyblade/proc/on_wield(obj/item/source, mob/user)
-	SIGNAL_HANDLER
-
-	wielded = TRUE
 	update_icon(UPDATE_ICON_STATE)
 
 /// triggered on unwield of two handed item
 /obj/item/highfrequencyblade/proc/on_unwield(obj/item/source, mob/user)
-	SIGNAL_HANDLER
-
-	wielded = FALSE
 	update_icon(UPDATE_ICON_STATE)
 
 /obj/item/highfrequencyblade/proc/slash(atom/target, mob/living/user, params)
@@ -920,7 +948,7 @@ for further reading, please see: https://github.com/tgstation/tgstation/pull/301
 	var/damage_mod = 1
 	var/x_slashed = text2num(modifiers[ICON_X]) || world.icon_size/2 //in case we arent called by a client
 	var/y_slashed = text2num(modifiers[ICON_Y]) || world.icon_size/2 //in case we arent called by a client
-	new /obj/effect/temp_visual/slash(get_turf(target), target, x_slashed, y_slashed)
+	new /obj/effect/temp_visual/slash(get_turf(target), target, x_slashed, y_slashed, slash_color)
 	if(target == previous_target?.resolve()) //if the same target, we calculate a damage multiplier if you swing your mouse around
 		var/x_mod = previous_x - x_slashed
 		var/y_mod = previous_y - y_slashed
@@ -954,7 +982,7 @@ for further reading, please see: https://github.com/tgstation/tgstation/pull/301
 	layer = ABOVE_ALL_MOB_LAYER
 	plane = ABOVE_GAME_PLANE
 
-/obj/effect/temp_visual/slash/Initialize(mapload, atom/target, x_slashed, y_slashed)
+/obj/effect/temp_visual/slash/Initialize(mapload, atom/target, x_slashed, y_slashed, slash_color)
 	. = ..()
 	if(!target)
 		return
@@ -969,7 +997,7 @@ for further reading, please see: https://github.com/tgstation/tgstation/pull/301
 	transform = new_transform
 	//Double the scale of the matrix by doubling the 2x2 part without touching the translation part
 	var/matrix/scaled_transform = new_transform + matrix(new_transform.a, new_transform.b, 0, new_transform.d, new_transform.e, 0)
-	animate(src, duration*0.5, color = COLOR_BLUE, transform = scaled_transform, alpha = 255)
+	animate(src, duration*0.5, color = slash_color, transform = scaled_transform, alpha = 255)
 
 /obj/item/highfrequencyblade/wizard
 	desc = "A blade that was mastercrafted by a legendary blacksmith. Its' enchantments let it slash through anything."

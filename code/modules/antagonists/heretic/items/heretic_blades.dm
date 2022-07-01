@@ -12,7 +12,8 @@
 	flags_1 = CONDUCT_1
 	sharpness = SHARP_EDGED
 	w_class = WEIGHT_CLASS_NORMAL
-	force = 17
+	force = 25 //SKYRAT EDIT - ORIGINAL: 17
+	armour_penetration = 15 // SKYRAT EDIT - ADDITION
 	throwforce = 10
 	hitsound = 'sound/weapons/bladeslice.ogg'
 	attack_verb_continuous = list("attacks", "slashes", "stabs", "slices", "tears", "lacerates", "rips", "dices", "rends")
@@ -37,7 +38,7 @@
 			to_chat(user, span_warning("You shatter [src], but your plea goes unanswered."))
 	else
 		to_chat(user,span_warning("You shatter [src]."))
-	playsound(src, "shatter", 70, TRUE) //copied from the code for smashing a glass sheet onto the ground to turn it into a shard
+	playsound(src, SFX_SHATTER, 70, TRUE) //copied from the code for smashing a glass sheet onto the ground to turn it into a shard
 	qdel(src)
 
 /obj/item/melee/sickly_blade/afterattack(atom/target, mob/user, proximity_flag, click_parameters)
@@ -46,9 +47,9 @@
 		return
 
 	if(proximity_flag)
-		SEND_SIGNAL(user, COMSIG_HERETIC_BLADE_ATTACK, target)
+		SEND_SIGNAL(user, COMSIG_HERETIC_BLADE_ATTACK, target, src)
 	else
-		SEND_SIGNAL(user, COMSIG_HERETIC_RANGED_BLADE_ATTACK, target)
+		SEND_SIGNAL(user, COMSIG_HERETIC_RANGED_BLADE_ATTACK, target, src)
 
 /obj/item/melee/sickly_blade/examine(mob/user)
 	. = ..()
@@ -57,6 +58,7 @@
 
 	. += span_notice("You can shatter the blade to teleport to a random, (mostly) safe location by <b>activating it in-hand</b>.")
 
+// Path of Rust's blade
 /obj/item/melee/sickly_blade/rust
 	name = "\improper rusted blade"
 	desc = "This crescent blade is decrepit, wasting to rust. \
@@ -65,14 +67,16 @@
 	inhand_icon_state = "rust_blade"
 	after_use_message = "The Rusted Hills hear your call..."
 
+// Path of Ash's blade
 /obj/item/melee/sickly_blade/ash
 	name = "\improper ashen blade"
 	desc = "Molten and unwrought, a hunk of metal warped to cinders and slag. \
 		Unmade, it aspires to be more than it is, and shears soot-filled wounds with a blunt edge."
 	icon_state = "ash_blade"
 	inhand_icon_state = "ash_blade"
-	after_use_message = "The Nightwater hears your call..."
+	after_use_message = "The Nightwatcher hears your call..."
 
+// Path of Flesh's blade
 /obj/item/melee/sickly_blade/flesh
 	name = "\improper bloody blade"
 	desc = "A crescent blade born from a fleshwarped creature. \
@@ -81,6 +85,7 @@
 	inhand_icon_state = "flesh_blade"
 	after_use_message = "The Marshal hears your call..."
 
+// Path of Void's blade
 /obj/item/melee/sickly_blade/void
 	name = "\improper void blade"
 	desc = "Devoid of any substance, this blade reflects nothingness. \
@@ -88,3 +93,12 @@
 	icon_state = "void_blade"
 	inhand_icon_state = "void_blade"
 	after_use_message = "The Aristocrat hears your call..."
+
+// Path of the Blade's... blade
+// Opting for /dark (darkened blade) instead of /blade to avoid "sickly_blade/blade".
+/obj/item/melee/sickly_blade/dark
+	name = "\improper darkened blade"
+	desc = "A blade made of brilliant silver that shines gloriously. Unknown rage is bottled within."
+	icon_state = "dark_blade"
+	inhand_icon_state = "dark_blade"
+	after_use_message = "The Colonel hears your call..."

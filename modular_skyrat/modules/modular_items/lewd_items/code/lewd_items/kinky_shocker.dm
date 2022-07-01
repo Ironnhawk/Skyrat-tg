@@ -112,6 +112,7 @@
 		to_chat(user, span_danger("[src] must be enabled before use!"))
 		return
 	var/message = ""
+	var/targetedsomewhere = FALSE
 	if(!target.client?.prefs?.read_preference(/datum/preference/toggle/erp/sex_toy))
 		to_chat(user, span_danger("[target] doesn't want you to do that."))
 		return
@@ -119,8 +120,9 @@
 	playsound(loc, 'sound/weapons/taserhit.ogg', 70, 1, -1)
 	switch(user.zone_selected) //to let code know what part of body we gonna tickle
 		if(BODY_ZONE_PRECISE_GROIN)
-			var/obj/item/organ/genital/penis = target.getorganslot(ORGAN_SLOT_PENIS)
-			var/obj/item/organ/genital/vagina = target.getorganslot(ORGAN_SLOT_VAGINA)
+			targetedsomewhere = TRUE
+			var/obj/item/organ/external/genital/penis = target.getorganslot(ORGAN_SLOT_PENIS)
+			var/obj/item/organ/external/genital/vagina = target.getorganslot(ORGAN_SLOT_VAGINA)
 			if(vagina && penis)
 				if(target.is_bottomless() || (penis.visibility_preference == GENITAL_ALWAYS_SHOW && vagina.visibility_preference == GENITAL_ALWAYS_SHOW))
 					message = (user == target) ? pick("leans [src] against [target.p_their()] penis, letting it shock it. Ouch...",
@@ -178,7 +180,8 @@
 					return
 
 		if(BODY_ZONE_CHEST)
-			var/obj/item/organ/genital/breasts = target.getorganslot(ORGAN_SLOT_BREASTS)
+			targetedsomewhere = TRUE
+			var/obj/item/organ/external/genital/breasts = target.getorganslot(ORGAN_SLOT_BREASTS)
 			if(breasts)
 				if(breasts.visibility_preference == GENITAL_ALWAYS_SHOW || target.is_topless())
 					message = (user == target) ? pick("leans [src] against [target.p_their()] breasts, letting it shock it.",
@@ -200,6 +203,7 @@
 					return
 
 		if(BODY_ZONE_R_ARM)
+			targetedsomewhere = TRUE
 			if(target.has_arms())
 				if(target.is_hands_uncovered())
 					message = (user == target) ? pick("leans [src] against [target.p_their()] right arm, letting it shock it.",
@@ -214,6 +218,7 @@
 				return
 
 		if(BODY_ZONE_L_ARM)
+			targetedsomewhere = TRUE
 			if(target.has_arms())
 				if(target.is_hands_uncovered())
 					message = (user == target) ? pick("leans [src] against [target.p_their()] left arm, letting it shock it.",
@@ -228,6 +233,7 @@
 				return
 
 		if(BODY_ZONE_HEAD)
+			targetedsomewhere = TRUE
 			if(target.is_head_uncovered())
 				message = (user == target) ? pick("leans [src] against [target.p_their()] head, letting it shock it. Ouch! Why would they do that?!",
 											"shocks [target.p_their()] head with [src]") : pick("uses [src] to shock [target]'s head",
@@ -238,6 +244,7 @@
 				return
 
 		if(BODY_ZONE_L_LEG)
+			targetedsomewhere = TRUE
 			if(target.has_feet())
 				if(target.is_barefoot())
 					message = (user == target) ? pick("leans [src] against [target.p_their()] left leg, letting it shock it.",
@@ -252,6 +259,7 @@
 				return
 
 		if(BODY_ZONE_R_LEG)
+			targetedsomewhere = TRUE
 			if(target.has_feet())
 				if(target.is_barefoot())
 					message = (user == target) ? pick("leans [src] against [target.p_their()] right leg, letting it shock it.",
@@ -265,13 +273,15 @@
 			else
 				to_chat(user, span_danger("[target] doesn't have any legs!"))
 				return
+	if(!targetedsomewhere)
+		return
 	user.visible_message(span_purple("[user] [message]!"))
-	playsound(loc,'sound/weapons/taserhit.ogg')
+	playsound(loc, 'sound/weapons/taserhit.ogg')
 	if(target.stat == DEAD)
 		return
 	if(prob(80))
-		target.emote(pick("twitch","twitch_s","shiver","scream"))
+		target.try_lewd_autoemote(pick("twitch", "twitch_s", "shiver", "scream"))
 	target.do_jitter_animation()
 	target.adjustStaminaLoss(3)
 	target.adjustPain(9)
-	target.stuttering += 20
+	target.adjust_timed_status_effect(30 SECONDS, /datum/status_effect/speech/stutter)

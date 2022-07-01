@@ -13,7 +13,7 @@
 
 	target_mobtypes = list(/mob/living/carbon/human)
 	possible_locs = list(BODY_ZONE_CHEST)
-	requires_bodypart_type = BODYPART_ROBOTIC
+	requires_bodypart_type = BODYTYPE_ROBOTIC
 	desc = "A surgical procedure that reboots a positronic brain."
 
 /datum/surgery/robot_chassis_restoration/can_start(mob/user, mob/living/carbon/target)
@@ -23,7 +23,7 @@
 		return FALSE
 	if(target.suiciding)
 		return FALSE
-	var/obj/item/organ/brain/target_brain = target.getorganslot(ORGAN_SLOT_BRAIN)
+	var/obj/item/organ/internal/brain/target_brain = target.getorganslot(ORGAN_SLOT_BRAIN)
 	if(!target_brain)
 		return FALSE
 	return TRUE

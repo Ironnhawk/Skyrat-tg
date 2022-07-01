@@ -8,7 +8,7 @@
 /area/ruin/powered/biodome)
 "c" = (
 /obj/structure/flora/grass/jungle,
-/turf/open/floor/plating/grass/jungle{
+/turf/open/misc/grass/jungle{
 	planetary_atmos = 0
 	},
 /area/ruin/powered/biodome)
@@ -18,7 +18,7 @@
 /area/ruin/powered/biodome)
 "e" = (
 /obj/structure/flora/tree/jungle/small,
-/turf/open/floor/plating/grass/jungle{
+/turf/open/misc/grass/jungle{
 	planetary_atmos = 0
 	},
 /area/ruin/powered/biodome)
@@ -50,7 +50,7 @@
 /area/ruin/powered/biodome)
 "o" = (
 /obj/structure/flora/grass/jungle/b,
-/turf/open/floor/plating/grass/jungle{
+/turf/open/misc/grass/jungle{
 	planetary_atmos = 0
 	},
 /area/ruin/powered/biodome)
@@ -71,8 +71,8 @@
 /turf/open/floor/iron,
 /area/ruin/powered/biodome)
 "t" = (
-/obj/structure/flora/rock/jungle,
-/turf/open/floor/plating/grass/jungle{
+/obj/structure/flora/rock/pile/jungle,
+/turf/open/misc/grass/jungle{
 	planetary_atmos = 0
 	},
 /area/ruin/powered/biodome)
@@ -123,32 +123,32 @@
 /turf/open/floor/iron,
 /area/ruin/powered/biodome)
 "F" = (
-/obj/structure/flora/junglebush,
-/turf/open/floor/plating/grass/jungle{
+/obj/structure/flora/bush/jungle,
+/turf/open/misc/grass/jungle{
 	planetary_atmos = 0
 	},
 /area/ruin/powered/biodome)
 "L" = (
-/obj/structure/flora/junglebush/b,
-/turf/open/floor/plating/grass/jungle{
+/obj/structure/flora/bush/jungle/b,
+/turf/open/misc/grass/jungle{
 	planetary_atmos = 0
 	},
 /area/ruin/powered/biodome)
 "M" = (
-/obj/structure/flora/junglebush/large,
-/turf/open/floor/plating/grass/jungle{
+/obj/structure/flora/bush/large,
+/turf/open/misc/grass/jungle{
 	planetary_atmos = 0
 	},
 /area/ruin/powered/biodome)
 "O" = (
 /obj/structure/flora/tree/jungle,
-/turf/open/floor/plating/grass/jungle{
+/turf/open/misc/grass/jungle{
 	planetary_atmos = 0
 	},
 /area/ruin/powered/biodome)
 "P" = (
-/obj/structure/flora/stump,
-/turf/open/floor/plating/grass/jungle{
+/obj/structure/flora/tree/stump,
+/turf/open/misc/grass/jungle{
 	planetary_atmos = 0
 	},
 /area/ruin/powered/biodome)
@@ -161,13 +161,13 @@
 /turf/open/floor/iron,
 /area/ruin/powered/biodome)
 "R" = (
-/obj/structure/flora/rock/pile/largejungle,
-/turf/open/floor/plating/grass/jungle{
+/obj/structure/flora/rock/pile/jungle/large,
+/turf/open/misc/grass/jungle{
 	planetary_atmos = 0
 	},
 /area/ruin/powered/biodome)
 "T" = (
-/turf/open/floor/plating/grass/jungle{
+/turf/open/misc/grass/jungle{
 	planetary_atmos = 0
 	},
 /area/ruin/powered/biodome)

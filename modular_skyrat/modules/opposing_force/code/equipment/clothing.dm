@@ -50,6 +50,16 @@
 	item_type = /obj/item/storage/box/syndie_kit/chameleon
 	description = "A box containing a set of chameleon gear, perfect for disguise and infiltration."
 
+/datum/opposing_force_equipment/clothing/ablative_coat
+	name = "Ablative Trenchcoat"
+	item_type = /obj/item/clothing/suit/hooded/ablative
+	description = "A hooded coat that can be worn above a jumpsuit, allowing you to reflect and absorb energy weapons."
+
+/datum/opposing_force_equipment/clothing/muffling_balaclava
+	name = "Voice-Muffling Balaclava"
+	item_type = /obj/item/clothing/mask/infiltrator
+	description = "A balaclava that muffles your voice, masking your identity. Also provides flash immunity!"
+
 //NRI larping equipment here
 
 /datum/opposing_force_equipment/clothing/nrihelm

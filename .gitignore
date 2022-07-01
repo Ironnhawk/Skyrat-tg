@@ -204,6 +204,11 @@ Temporary Items
 
 # TGUI bundles - SKYRAT EDIT
 /tgui/public/tgui-common.bundle.js
+# JavaScript tools
+**/node_modules
+
+# Screenshot tests
+/artifacts
 modular_skyrat/modules/paperwork/code/adminpaper.dm
 modular_skyrat/modules/paperwork/code/carbonpaper.dm
 modular_skyrat/modules/paperwork/code/clipboard.dm
@@ -260,3 +265,4 @@ modular_skyrat/modules/adminpanels/code/modules/gauntlet/syndie.dm
 modular_skyrat/modules/adminpanels/code/modules/gauntlet/icons/infinity.dmi
 modular_skyrat/modules/adminpanels/code/smites.dm/snap.dm
 .vscode/settings.json
+

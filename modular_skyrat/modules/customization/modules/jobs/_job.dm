@@ -86,9 +86,6 @@
 /datum/job/head_of_personnel
 	banned_quirks = list(HEAD_RESTRICTED_QUIRKS)
 
-/datum/job/quartermaster
-	banned_quirks = list(HEAD_RESTRICTED_QUIRKS)
-
 //Silicon
 /datum/job/ai
 	loadout = FALSE
@@ -117,6 +114,21 @@
 
 /datum/job/atmospheric_technician
 	banned_quirks = list(TECH_RESTRICTED_QUIRKS)
+
+/datum/job/orderly
+	banned_quirks = list(GUARD_RESTRICTED_QUIRKS)
+
+/datum/job/science_guard
+	banned_quirks = list(GUARD_RESTRICTED_QUIRKS)
+
+/datum/job/customs_agent
+	banned_quirks = list(GUARD_RESTRICTED_QUIRKS)
+
+/datum/job/bouncer
+	banned_quirks = list(GUARD_RESTRICTED_QUIRKS)
+
+/datum/job/engineering_guard
+	banned_quirks = list(GUARD_RESTRICTED_QUIRKS)
 
 /datum/job/proc/has_required_languages(datum/preferences/pref)
 	if(!required_languages)

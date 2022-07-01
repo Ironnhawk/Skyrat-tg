@@ -9,7 +9,7 @@
 					'modular_skyrat/modules/aesthetics/computer/sound/keypress4.ogg',
 					'modular_skyrat/modules/aesthetics/computer/sound/keystroke4.ogg',
 				)
-			if(SFX_BULLET_IMPACT_METAL) //This is the one that will be used most, it is extensive.
+			if(SFX_BULLET_IMPACT_METAL) // This is the one that will be used most, it is extensive.
 				soundin = pick(
 					'modular_skyrat/modules/gunsgalore/sound/impact/impact_metal_01.ogg',
 					'modular_skyrat/modules/gunsgalore/sound/impact/impact_metal_02.ogg',
@@ -97,13 +97,13 @@
 				soundin = pick('modular_skyrat/master_files/sound/weapons/punch1.ogg', 'modular_skyrat/master_files/sound/weapons/punch3.ogg')
 			if ("explosion")
 				soundin = pick(
-					'modular_skyrat/master_files/sound/blackmesa/explosions/explode1.ogg',
-					'modular_skyrat/master_files/sound/blackmesa/explosions/explode2.ogg',
-					'modular_skyrat/master_files/sound/blackmesa/explosions/explode3.ogg',
-					'modular_skyrat/master_files/sound/blackmesa/explosions/explode4.ogg',
-					'modular_skyrat/master_files/sound/blackmesa/explosions/explode5.ogg',
-					'modular_skyrat/master_files/sound/blackmesa/explosions/explode6.ogg',
-					'modular_skyrat/master_files/sound/blackmesa/explosions/explode7.ogg',
+					'modular_skyrat/modules/black_mesa/sound/explosions/explode1.ogg',
+					'modular_skyrat/modules/black_mesa/sound/explosions/explode2.ogg',
+					'modular_skyrat/modules/black_mesa/sound/explosions/explode3.ogg',
+					'modular_skyrat/modules/black_mesa/sound/explosions/explode4.ogg',
+					'modular_skyrat/modules/black_mesa/sound/explosions/explode5.ogg',
+					'modular_skyrat/modules/black_mesa/sound/explosions/explode6.ogg',
+					'modular_skyrat/modules/black_mesa/sound/explosions/explode7.ogg',
 				)
 	return soundin
 

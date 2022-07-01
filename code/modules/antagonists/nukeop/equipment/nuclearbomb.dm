@@ -169,6 +169,16 @@ GLOBAL_VAR(station_nuke_source)
 				START_PROCESSING(SSobj, core)
 			return TRUE
 
+/obj/machinery/nuclearbomb/can_interact(mob/user)
+	if(HAS_TRAIT(user, TRAIT_CAN_USE_NUKE))
+		return TRUE
+	return ..()
+
+/obj/machinery/nuclearbomb/ui_state(mob/user)
+	if(HAS_TRAIT(user, TRAIT_CAN_USE_NUKE))
+		return GLOB.physical_state
+	return ..()
+
 /obj/machinery/nuclearbomb/proc/get_nuke_state()
 	if(exploding)
 		return NUKE_ON_EXPLODING
@@ -316,7 +326,7 @@ GLOBAL_VAR(station_nuke_source)
 	. = ..()
 	if(.)
 		return
-	playsound(src, "terminal_type", 20, FALSE)
+	playsound(src, SFX_TERMINAL_TYPE, 20, FALSE)
 	switch(action)
 		if("eject_disk")
 			if(auth && auth.loc == src)
@@ -471,7 +481,7 @@ GLOBAL_VAR(station_nuke_source)
 	safety = TRUE
 	update_appearance()
 	sound_to_playing_players('sound/machines/alarm.ogg')
-	sound_to_playing_players('modular_skyrat/modules/alerts/sound/ai/default/DeltaBOOM.ogg') //SKYRAT EDIT ADDITION
+	sound_to_playing_players('modular_skyrat/modules/alerts/sound/misc/delta_countdown.ogg') //SKYRAT EDIT ADDITION
 	if(SSticker?.mode)
 		SSticker.roundend_check_paused = TRUE
 	addtimer(CALLBACK(src, .proc/actually_explode), 100)
@@ -580,8 +590,8 @@ GLOBAL_VAR(station_nuke_source)
 	R.my_atom = src
 	R.add_reagent(/datum/reagent/consumable/ethanol/beer, 100)
 
-	var/datum/effect_system/foam_spread/foam = new
-	foam.set_up(200, get_turf(src), R)
+	var/datum/effect_system/fluid_spread/foam/foam = new
+	foam.set_up(200, location = get_turf(src), carry = R)
 	foam.start()
 	disarm()
 
@@ -596,7 +606,7 @@ GLOBAL_VAR(station_nuke_source)
 		var/datum/reagents/beer = new /datum/reagents(1000)
 		beer.my_atom = vent
 		beer.add_reagent(/datum/reagent/consumable/ethanol/beer, 100)
-		beer.create_foam(/datum/effect_system/foam_spread, 200)
+		beer.create_foam(/datum/effect_system/fluid_spread/foam, DIAMOND_AREA(10))
 
 		CHECK_TICK
 
@@ -606,7 +616,14 @@ GLOBAL_VAR(station_nuke_source)
 
 /proc/KillEveryoneOnStation()
 	for(var/mob/living/victim as anything in GLOB.mob_living_list)
-		if(victim.stat != DEAD && is_station_level(victim.z))
+		var/turf/target_turf = get_turf(victim)
+		if(istype(victim.loc, /obj/structure/closet/secure_closet/freezer))
+			var/obj/structure/closet/secure_closet/freezer/freezer = victim.loc
+			if(!freezer.jones)
+				to_chat(victim, span_boldannounce("You hold onto \the [victim.loc] as the nuclear bomb goes off. Luckily as \the [victim.loc] is lead-lined, you survive."))
+				freezer.jones = TRUE
+				continue
+		if(victim.stat != DEAD && target_turf && is_station_level(target_turf.z))
 			to_chat(victim, span_userdanger("You are shredded to atoms!"))
 			victim.gib()
 
@@ -615,7 +632,14 @@ GLOBAL_VAR(station_nuke_source)
 		return
 	for(var/_victim in GLOB.mob_living_list)
 		var/mob/living/victim = _victim
-		if(victim.stat != DEAD && victim.z == z)
+		var/turf/target_turf = get_turf(victim)
+		if(istype(victim.loc, /obj/structure/closet/secure_closet/freezer))
+			var/obj/structure/closet/secure_closet/freezer/freezer = victim.loc
+			if(!freezer.jones)
+				to_chat(victim, span_boldannounce("You hold onto \the [victim.loc] as the nuclear bomb goes off. Luckily as \the [victim.loc] is lead-lined, you survive."))
+				freezer.jones = TRUE
+				continue
+		if(victim.stat != DEAD && target_turf && target_turf.z == z)
 			to_chat(victim, span_userdanger("You are shredded to atoms!"))
 			victim.gib()
 

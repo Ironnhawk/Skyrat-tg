@@ -5,7 +5,7 @@
 /obj/item/reagent_containers/borghypo/borgshaker/specific/juice
 	name = "cyborg juice shaker"
 	icon_state = "juice"
-	reagent_ids = list(/datum/reagent/consumable/orangejuice,
+	default_reagent_types = list(/datum/reagent/consumable/orangejuice,
 					/datum/reagent/consumable/tomatojuice,
 					/datum/reagent/consumable/limejuice,
 					/datum/reagent/consumable/carrotjuice,
@@ -27,7 +27,7 @@
 /obj/item/reagent_containers/borghypo/borgshaker/specific/alcohol
 	name = "cyborg alcohol shaker"
 	icon_state = "alcohol"
-	reagent_ids = list(/datum/reagent/consumable/ethanol,
+	default_reagent_types = list(/datum/reagent/consumable/ethanol,
 					/datum/reagent/consumable/ethanol/beer,
 					/datum/reagent/consumable/ethanol/beer/maltliquor,
 					/datum/reagent/consumable/ethanol/kahlua,
@@ -58,7 +58,7 @@
 /obj/item/reagent_containers/borghypo/borgshaker/specific/soda
 	name = "cyborg soda shaker"
 	icon_state = "soda"
-	reagent_ids = list(/datum/reagent/consumable/space_cola,
+	default_reagent_types = list(/datum/reagent/consumable/space_cola,
 					/datum/reagent/consumable/dr_gibb,
 					/datum/reagent/consumable/space_up,
 					/datum/reagent/consumable/sodawater,
@@ -71,7 +71,7 @@
 /obj/item/reagent_containers/borghypo/borgshaker/specific/misc
 	name = "cyborg misc shaker"
 	icon_state = "misc"
-	reagent_ids = list(/datum/reagent/consumable/milk,
+	default_reagent_types = list(/datum/reagent/consumable/milk,
 					/datum/reagent/consumable/soymilk,
 					/datum/reagent/consumable/cream,
 					/datum/reagent/toxin/coffeepowder,
@@ -190,3 +190,41 @@
 
 /obj/item/inducer/cyborg/attack_self(mob/user)
 	return
+
+// Wirebrush for janiborg
+/datum/design/borg_wirebrush
+	name = "Cyborg Upgrade (Wire-brush)"
+	id = "borg_upgrade_brush"
+	build_type = MECHFAB
+	build_path = /obj/item/borg/upgrade/wirebrush
+	materials = list(/datum/material/iron = 4000)
+	construction_time = 40
+	category = list("Cyborg Upgrade Modules")
+
+/obj/item/borg/upgrade/wirebrush
+	name = "janitor cyborg wire-brush"
+	desc = "A tool to remove rust from walls."
+	icon_state = "cyborg_upgrade3"
+	require_model = TRUE
+	model_type = list(/obj/item/robot_model/janitor)
+	model_flags = BORG_MODEL_JANITOR
+
+/obj/item/borg/upgrade/wirebrush/action(mob/living/silicon/robot/cyborg)
+	. = ..()
+	if(.)
+		for(var/obj/item/wirebrush/brush in cyborg.model.modules)
+			cyborg.model.remove_module(brush, TRUE)
+
+		var/obj/item/wirebrush/brush = new /obj/item/wirebrush(cyborg.model)
+		cyborg.model.basic_modules += brush
+		cyborg.model.add_module(brush, FALSE, TRUE)
+
+/obj/item/borg/upgrade/wirebrush/deactivate(mob/living/silicon/robot/cyborg, user = usr)
+	. = ..()
+	if(.)
+		for(var/obj/item/wirebrush/brush in cyborg.model.modules)
+			cyborg.model.remove_module(brush, TRUE)
+
+		var/obj/item/wirebrush/brush = new (cyborg.model)
+		cyborg.model.basic_modules += brush
+		cyborg.model.add_module(brush, FALSE, TRUE)

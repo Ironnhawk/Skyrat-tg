@@ -68,9 +68,9 @@
 
 		// Now, we can ACTUALLY run the ritual. Let's do it.
 		// Attempt to run the knowledge via the sacrifice rune.
-		// If do_rituals() returns FALSE with our knowledge, it messed up.
-		// If do_rituals() returns TRUE, then it was successful.
-		if(!our_rune.do_rituals(our_heretic, list(knowledge)))
+		// If do_ritual() returns FALSE with our knowledge, it messed up.
+		// If do_ritual() returns TRUE, then it was successful.
+		if(!our_rune.do_ritual(our_heretic, knowledge))
 			// We failed. The knowledge should have everything to succeed, yet it returned FALSE!
 			// Clean up the atoms it was meant to consume, so we can keep testing.
 			for(var/atom/leftover as anything in created_atoms)
@@ -78,7 +78,7 @@
 				qdel(leftover)
 
 			// Aaand throw a fail.
-			Fail("Heretic rituals: ([knowledge.type]) Despite having all required atoms present, the ritual failed to transmute.")
+			TEST_FAIL("Heretic rituals: ([knowledge.type]) Despite having all required atoms present, the ritual failed to transmute.")
 			continue
 
 		// Making it here means the ritual was a success.
@@ -92,7 +92,7 @@
 			var/atom/result = locate(result_item_path) in nearby_atoms
 			// No, we couldn't find the a resulting atom on the rune. Throw a fail.
 			if(!result)
-				Fail("Heretic rituals: ([knowledge.type]) Despite successfully completing the ritual, a resulting atom could not be found ([result_item_path])")
+				TEST_FAIL("Heretic rituals: ([knowledge.type]) Despite successfully completing the ritual, a resulting atom could not be found ([result_item_path])")
 				continue
 
 			// Yes, we got a resulting atom we expected! Remove it from the list and clean up.
@@ -108,7 +108,7 @@
 			// There are atoms around the rune still, and there shouldn't be.
 			// All component atoms were consumed, and all resulting atoms were cleaned up.
 			// This means the ritual may have messed up somewhere. Throw a fail and clean them up so we can keep testing.
-			Fail("Heretic rituals: ([knowledge.type]) After completing the ritual, there were non-result atoms remaining on the rune. ([thing] - [thing.type])")
+			TEST_FAIL("Heretic rituals: ([knowledge.type]) After completing the ritual, there were non-result atoms remaining on the rune. ([thing] - [thing.type])")
 			nearby_atoms -= thing
 			qdel(thing)
 

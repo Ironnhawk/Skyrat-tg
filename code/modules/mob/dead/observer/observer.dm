@@ -13,7 +13,7 @@ GLOBAL_VAR_INIT(observer_default_invisibility, INVISIBILITY_OBSERVER)
 	density = FALSE
 	see_invisible = SEE_INVISIBLE_OBSERVER
 	see_in_dark = 100
-	lighting_alpha = LIGHTING_PLANE_ALPHA_MOSTLY_INVISIBLE
+	lighting_alpha = LIGHTING_PLANE_ALPHA_MOSTLY_VISIBLE
 	invisibility = INVISIBILITY_OBSERVER
 	hud_type = /datum/hud/ghost
 	movement_type = GROUND | FLYING
@@ -150,6 +150,7 @@ GLOBAL_VAR_INIT(observer_default_invisibility, INVISIBILITY_OBSERVER)
 	data_huds_on = 1
 
 	SSpoints_of_interest.make_point_of_interest(src)
+	ADD_TRAIT(src, TRAIT_HEAR_THROUGH_DARKNESS, ref(src))
 
 /mob/dead/observer/get_photo_description(obj/item/camera/camera)
 	if(!invisibility || camera.see_ghosts)
@@ -280,19 +281,30 @@ Works together with spawning an observer, noted above.
 */
 
 /mob/proc/ghostize(can_reenter_corpse = TRUE)
-	if(key)
-		if(key[1] != "@") // Skip aghosts.
-			if(HAS_TRAIT(src, TRAIT_CORPSELOCKED) && can_reenter_corpse) //If you can re-enter the corpse you can't leave when corpselocked
-				return
-			stop_sound_channel(CHANNEL_HEARTBEAT) //Stop heartbeat sounds because You Are A Ghost Now
-			var/mob/dead/observer/ghost = new(src) // Transfer safety to observer spawning proc.
-			SStgui.on_transfer(src, ghost) // Transfer NanoUIs.
-			ghost.can_reenter_corpse = can_reenter_corpse
-			ghost.key = key
-			ghost.client?.init_verbs()
-			if(!can_reenter_corpse)// Disassociates observer mind from the body mind
-				ghost.mind = null
-			return ghost
+	if(!key)
+		return
+	if(key[1] == "@") // Skip aghosts.
+		return
+
+	if(HAS_TRAIT(src, TRAIT_CORPSELOCKED))
+		if(can_reenter_corpse) //If you can re-enter the corpse you can't leave when corpselocked
+			return
+		if(ishuman(usr)) //following code only applies to those capable of having an ethereal heart, ie humans
+			var/mob/living/carbon/human/crystal_fella = usr
+			var/our_heart = crystal_fella.getorganslot(ORGAN_SLOT_HEART)
+			if(istype(our_heart, /obj/item/organ/internal/heart/ethereal)) //so you got the heart?
+				var/obj/item/organ/internal/heart/ethereal/ethereal_heart = our_heart
+				ethereal_heart.stop_crystalization_process(crystal_fella) //stops the crystallization process
+
+	stop_sound_channel(CHANNEL_HEARTBEAT) //Stop heartbeat sounds because You Are A Ghost Now
+	var/mob/dead/observer/ghost = new(src) // Transfer safety to observer spawning proc.
+	SStgui.on_transfer(src, ghost) // Transfer NanoUIs.
+	ghost.can_reenter_corpse = can_reenter_corpse
+	ghost.key = key
+	ghost.client?.init_verbs()
+	if(!can_reenter_corpse)// Disassociates observer mind from the body mind
+		ghost.mind = null
+	return ghost
 
 /mob/living/ghostize(can_reenter_corpse = TRUE)
 	. = ..()
@@ -311,8 +323,9 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 	if(stat != DEAD)
 		succumb()
 	if(stat == DEAD)
-		ghostize(TRUE)
-		return TRUE
+		if(!HAS_TRAIT(src, TRAIT_CORPSELOCKED)) //corpse-locked have to confirm with the alert below
+			ghostize(TRUE)
+			return TRUE
 	// SKYRAT EDIT ADDITION -- Free Ghost Cafe Ghosting
 	if(HAS_TRAIT(src, TRAIT_FREE_GHOST))
 		ghostize(TRUE) // Can return with TRUE
@@ -372,7 +385,7 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 	if(!mind || QDELETED(mind.current))
 		to_chat(src, span_warning("You have no body."))
 		return
-	if(!can_reenter_corpse)
+	if(!can_reenter_corpse && !mind.has_antag_datum(/datum/antagonist/changeling)) //SKYRAT EDIT
 		to_chat(src, span_warning("You cannot re-enter your body."))
 		return
 	if(mind.current.key && mind.current.key[1] != "@") //makes sure we don't accidentally kick any clients
@@ -740,13 +753,13 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 
 /mob/dead/observer/proc/show_data_huds()
 	for(var/hudtype in datahuds)
-		var/datum/atom_hud/H = GLOB.huds[hudtype]
-		H.add_hud_to(src)
+		var/datum/atom_hud/data_hud = GLOB.huds[hudtype]
+		data_hud.show_to(src)
 
 /mob/dead/observer/proc/remove_data_huds()
 	for(var/hudtype in datahuds)
-		var/datum/atom_hud/H = GLOB.huds[hudtype]
-		H.remove_hud_from(src)
+		var/datum/atom_hud/data_hud = GLOB.huds[hudtype]
+		data_hud.hide_from(src)
 
 /mob/dead/observer/verb/toggle_data_huds()
 	set name = "Toggle Sec/Med/Diag HUD"
@@ -838,6 +851,9 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 
 /mob/dead/observer/is_literate()
 	return TRUE
+
+/mob/dead/observer/can_read(obj/O, check_for_light = FALSE)
+	return TRUE // we want to bypass all the checks
 
 /mob/dead/observer/vv_edit_var(var_name, var_value)
 	. = ..()
@@ -983,7 +999,7 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 
 
 // Ghosts have no momentum, being massless ectoplasm
-/mob/dead/observer/Process_Spacemove(movement_dir)
+/mob/dead/observer/Process_Spacemove(movement_dir, continuous_move = FALSE)
 	return TRUE
 
 /mob/dead/observer/vv_edit_var(var_name, var_value)
@@ -1048,3 +1064,9 @@ This is the proc mobs get to turn into a ghost. Forked from ghostize due to comp
 			client.images += t_ray_images
 		else
 			client.images -= stored_t_ray_images
+
+/mob/dead/observer/default_lighting_alpha()
+	var/datum/preferences/prefs = client?.prefs
+	if(!prefs || (client?.combo_hud_enabled && prefs.toggles & COMBOHUD_LIGHTING))
+		return ..()
+	return GLOB.ghost_lighting_options[prefs.read_preference(/datum/preference/choiced/ghost_lighting)]

@@ -269,14 +269,9 @@ GLOBAL_DATUM_INIT(data_core, /datum/datacore, new)
 		G.fields["photo_front"] = photo_front
 		G.fields["photo_side"] = photo_side
 		// SKYRAT ADDITION START - RP RECORDS
-		if(C && C.prefs && C.prefs.read_preference(/datum/preference/text/general))
-			G.fields["past_records"] = C.prefs.read_preference(/datum/preference/text/general)
-		else
-			G.fields["past_records"] = ""
-		if (C && C.prefs && C.prefs.read_preference(/datum/preference/text/exploitable))
-			G.fields["exploitable_records"] = C.prefs.read_preference(/datum/preference/text/exploitable)
-		else
-			G.fields["exploitable_records"] = ""
+		G.fields["past_records"] = C?.prefs?.read_preference(/datum/preference/text/general) || ""
+		G.fields["background_records"] = C?.prefs?.read_preference(/datum/preference/text/background) || ""
+		G.fields["exploitable_records"] = C?.prefs?.read_preference(/datum/preference/text/exploitable) || ""
 		// SKYRAT ADDITION END
 		general += G
 
@@ -388,13 +383,16 @@ GLOBAL_DATUM_INIT(data_core, /datum/datacore, new)
 		security_records_out += list(crew_record)
 	return security_records_out
 
-/datum/datacore/proc/get_id_photo(mob/living/carbon/human/H, client/C, show_directions = list(SOUTH))
-	var/datum/job/J = H.mind.assigned_role
-	var/datum/preferences/P
-	if(!C)
-		C = H.client
-	if(C)
-		P = C.prefs
-	return get_flat_human_icon(null, J, P, DUMMY_HUMAN_SLOT_MANIFEST, show_directions)
+/datum/datacore/proc/get_id_photo(mob/living/carbon/human/human, client/client, show_directions = list(SOUTH))
+	var/datum/job/humans_job = human.mind.assigned_role
+	var/datum/preferences/humans_prefs
+	if(!client)
+		client = human.client
+	if(client)
+		humans_prefs = client.prefs
+	if (human.dna.species.roundstart_changed)
+		return get_flat_human_icon(null, humans_job, null, DUMMY_HUMAN_SLOT_MANIFEST, show_directions)
+	else
+		return get_flat_human_icon(null, humans_job, humans_prefs, DUMMY_HUMAN_SLOT_MANIFEST, show_directions)
 
 #undef DUMMY_HUMAN_SLOT_MANIFEST

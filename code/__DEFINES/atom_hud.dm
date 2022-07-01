@@ -2,6 +2,7 @@
 // note: if you add more HUDs, even for non-human atoms, make sure to use unique numbers for the defines!
 // /datum/atom_hud expects these to be unique
 // these need to be strings in order to make them associative lists
+
 /// dead, alive, sick, health status
 #define HEALTH_HUD "1"
 /// a simple line rounding the mob's number health
@@ -44,9 +45,12 @@
 #define ANTAG_HUD "23"
 // for fans to identify pins
 #define FAN_HUD "24"
-//SKYRAT EDIT ADDITION - GUNHUD
-// ammo of guns
+//SKYRAT EDIT START
+/// ammo of guns
 #define AMMO_HUD	"25"
+/// if they have a gun permit
+#define PERMIT_HUD "26"
+//SKYRAT EDIT END
 
 //by default everything in the hud_list of an atom is an image
 //a value in hud_list with one of these will change that behavior
@@ -64,6 +68,7 @@
 #define DATA_HUD_SENTIENT_DISEASE 8
 #define DATA_HUD_AI_DETECT 9
 #define DATA_HUD_FAN 10
+#define DATA_HUD_PERMIT 11 //SKYRAT EDIT
 
 // Notification action types
 #define NOTIFY_JUMP "jump"

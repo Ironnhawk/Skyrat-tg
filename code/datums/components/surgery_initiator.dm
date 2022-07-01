@@ -89,7 +89,7 @@
 		if(affecting)
 			if(!surgery.requires_bodypart)
 				continue
-			if(surgery.requires_bodypart_type && affecting.status != surgery.requires_bodypart_type)
+			if(surgery.requires_bodypart_type && !(affecting.bodytype & surgery.requires_bodypart_type))
 				continue
 			if(surgery.requires_real_bodypart && affecting.is_pseudopart)
 				continue
@@ -128,7 +128,7 @@
 
 	var/required_tool_type = TOOL_CAUTERY
 	var/obj/item/close_tool = user.get_inactive_held_item()
-	var/is_robotic = the_surgery.requires_bodypart_type == BODYPART_ROBOTIC
+	var/is_robotic = the_surgery.requires_bodypart_type == BODYTYPE_ROBOTIC
 
 	if(is_robotic)
 		required_tool_type = TOOL_SCREWDRIVER
@@ -143,7 +143,7 @@
 		return
 
 	if(the_surgery.operated_bodypart)
-		the_surgery.operated_bodypart.generic_bleedstacks -= 5
+		the_surgery.operated_bodypart.adjustBleedStacks(-5)
 
 	patient.surgeries -= the_surgery
 	REMOVE_TRAIT(patient, TRAIT_ALLOWED_HONORBOUND_ATTACK, ELEMENT_TRAIT(type))
@@ -300,7 +300,7 @@
 
 		return
 
-	if (!isnull(affecting_limb) && surgery.requires_bodypart_type && affecting_limb.status != surgery.requires_bodypart_type)
+	if (!isnull(affecting_limb) && surgery.requires_bodypart_type && !(affecting_limb.bodytype & surgery.requires_bodypart_type))
 		target.balloon_alert(user, "not the right type of limb!")
 		return
 
@@ -328,6 +328,9 @@
 		span_notice("You drape [parent] over [target]'s [parse_zone(selected_zone)] to prepare for \an [procedure.name]."),
 	)
 
+	if(!(HAS_TRAIT(target, TRAIT_NUMBED) || target.stat >= UNCONSCIOUS)) ///skyrat add start - warning for unanesthetized surgery
+		target.balloon_alert(user, "not numbed!") ///skyrat add end
+	
 	log_combat(user, target, "operated on", null, "(OPERATION TYPE: [procedure.name]) (TARGET AREA: [selected_zone])")
 
 /datum/component/surgery_initiator/proc/surgery_needs_exposure(datum/surgery/surgery, mob/living/target)

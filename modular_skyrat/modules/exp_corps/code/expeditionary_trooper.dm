@@ -20,7 +20,7 @@
 	outfit = /datum/outfit/job/expeditionary_trooper
 	plasmaman_outfit = /datum/outfit/plasmaman/mining
 
-	paycheck = PAYCHECK_HARD
+	paycheck = PAYCHECK_CREW
 	paycheck_department = ACCOUNT_SCI
 
 	display_order = JOB_DISPLAY_ORDER_EXP_CORPS
@@ -31,11 +31,6 @@
 	veteran_only = TRUE
 
 	job_flags = JOB_ANNOUNCE_ARRIVAL | JOB_CREW_MANIFEST | JOB_EQUIP_RANK | JOB_CREW_MEMBER | JOB_NEW_PLAYER_JOINABLE | JOB_REOPEN_ON_ROUNDSTART_LOSS | JOB_ASSIGN_QUIRKS
-
-/datum/job/expeditionary_trooper/after_spawn(mob/living/carbon/human/H, mob/M)
-	. = ..()
-	to_chat(M, span_redtext("As a Vanguard Operative you are not part of security! You must not perform security duties unless absolutely nessecary. \
-	Do not valid hunt using your equipment. Use common sense. Failure to follow these simple rules will result in a job ban."))
 
 /datum/outfit/job/expeditionary_trooper
 	name = "Vanguard Operative"
@@ -57,14 +52,14 @@
 	id = /obj/item/card/id/advanced/silver/exp_corps
 	id_trim = /datum/id_trim/job/expeditionary_trooper
 
-	belt = /obj/item/pda/expeditionary_corps
+	belt = /obj/item/modular_computer/tablet/pda/expeditionary_corps
 
 /obj/effect/landmark/start/expeditionary_corps
 	name = "Vanguard Operative"
 	icon_state = "Vanguard Operative"
 	icon = 'modular_skyrat/master_files/icons/mob/landmarks.dmi'
 
-/obj/item/pda/expeditionary_corps
+/obj/item/modular_computer/tablet/pda/expeditionary_corps
 	greyscale_colors = "#891417#000099"
 	name = "Military PDA"
 
@@ -125,7 +120,7 @@
 
 //base, don't use this, but leaving it for admin spawns is probably a good call?
 /obj/structure/closet/crate/secure/exp_corps/PopulateContents()
-	new /obj/item/storage/firstaid/tactical(src)
+	new /obj/item/storage/medkit/tactical(src)
 	new /obj/item/storage/box/expeditionary_survival(src)
 	new /obj/item/radio(src)
 	new /obj/item/melee/tomahawk(src)
@@ -137,7 +132,7 @@
 
 //shield guy
 /obj/structure/closet/crate/secure/exp_corps/pointman/PopulateContents()
-	new /obj/item/storage/firstaid/regular(src)
+	new /obj/item/storage/medkit/regular(src)
 	new /obj/item/storage/box/expeditionary_survival(src)
 	new /obj/item/radio(src)
 	new /obj/item/melee/tomahawk(src)
@@ -150,7 +145,7 @@
 
 //medic
 /obj/structure/closet/crate/secure/exp_corps/field_medic/PopulateContents()
-	new /obj/item/storage/firstaid/expeditionary(src)
+	new /obj/item/storage/medkit/expeditionary(src)
 	new /obj/item/storage/box/expeditionary_survival(src)
 	new /obj/item/radio(src)
 	new /obj/item/clothing/gloves/color/latex/nitrile/expeditionary_corps(src)
@@ -162,7 +157,7 @@
 
 //engineer gaming
 /obj/structure/closet/crate/secure/exp_corps/combat_tech/PopulateContents()
-	new /obj/item/storage/firstaid/emergency(src)
+	new /obj/item/storage/medkit/emergency(src)
 	new /obj/item/storage/box/expeditionary_survival(src)
 	new /obj/item/radio(src)
 	new /obj/item/melee/tomahawk(src)
@@ -174,9 +169,9 @@
 	new /obj/item/skillchip/job/engineer(src)
 	new /obj/item/storage/bag/material(src)
 
-//edgy loner with knives
+//edgy loner with knives AND A FUKKEN gun
 /obj/structure/closet/crate/secure/exp_corps/marksman/PopulateContents()
-	new /obj/item/storage/firstaid/regular(src)
+	new /obj/item/storage/medkit/regular(src)
 	new /obj/item/storage/box/expeditionary_survival(src)
 	new /obj/item/radio(src)
 	new /obj/item/storage/bag/ammo/marksman(src)
@@ -185,3 +180,4 @@
 	new /obj/item/clothing/suit/armor/vest/expeditionary_corps(src)
 	new /obj/item/storage/belt/military/expeditionary_corps/marksman(src)
 	new /obj/item/storage/backpack/duffelbag/expeditionary_corps(src)
+	new /obj/item/storage/box/gunset/ladon(src)
